@@ -69,7 +69,7 @@ class Romma {
     private function sortRoutesByPatternLength() {
         // Sort routes by length
         // The longest ones should be compared to the request first
-        // Otherwise a shorter request that starts the same way may handle it
+        // Otherwise a shorter pattern that starts the same way may handle it
         usort($this->routes, function($a, $b){
             return strlen($a->pattern) < strlen($b->pattern);
         });
