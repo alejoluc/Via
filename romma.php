@@ -4,21 +4,18 @@ namespace Romma;
 
 class Romma {
     const METHOD_ALL = 'ROMMA_ALL';
+    const REQUEST_STRING_DEFAULT = '/';
 
     private $routes = [];
     private $id_counter = 0;
 
-    private $request_string = '/';
+    private $request_string = null;
 
     private $options = [
         'case_insensitive' => true
     ];
 
-    public function add(
-        $method = METHOD_ALL,
-        $pattern,
-        $destination
-    ) {
+    public function add($method = METHOD_ALL, $pattern, $destination) {
         $route = new Route;
         $route->id = $this->id_counter++;
         $route->method = $method;
@@ -26,7 +23,6 @@ class Romma {
         $route->destination = $destination;
 
         $this->routes[] = $route;
-
         return $route;
     }
 
@@ -43,18 +39,22 @@ class Romma {
     }
 
     public function dispatch(){
+        if ($this->request_string === null) $this->request_string = $this::REQUEST_STRING_DEFAULT;
+
         $this->sortRoutesByPatternLength();
 
         $flags_string = '';
-
         if ($this->options['case_insensitive']) $flags_string .= 'i';
+
+        $matches = [];
 
         foreach ($this->routes as $route) {
             if (preg_match("@^" . $route->pattern . "$@{$flags_string}", $this->request_string)) {
                 return $route->destination;
             }
         }
-        throw new NoSuchRouteException;
+
+        throw new NoSuchRouteException("The route $this->request_string does not exist");
     }
 
     private function sortRoutesByPatternLength() {
@@ -72,7 +72,9 @@ class Romma {
         return $string;
     }
 
-    private function ensurePreAndPostSlashes($string) {
+    private function ensurePreAndPostSlashes($string = '') {
+        if (strlen($string) === 0) return '/';
+
         // If routes can contain UTF-8 characters, and they shouldn't, I should use mb_*
         if ($string[0] !== '/')                     $string = "/{$string}";
         if ($string[(strlen($string)-1)] !== '/')   $string = "{$string}/";
