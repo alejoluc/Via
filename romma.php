@@ -12,7 +12,8 @@ class Romma {
     private $request_string = null;
 
     private $options = [
-        'case_insensitive' => true
+        'case_insensitive' => true,
+        'match_empty_sections' => false
     ];
 
     public function add($method = METHOD_ALL, $pattern, $destination) {
@@ -49,8 +50,15 @@ class Romma {
         $matches = [];
 
         foreach ($this->routes as $route) {
+            $route->pattern = $this->generateCaptureGroups($route->pattern);
             $pattern = "@^" . $route->pattern . "$@{$flags_string}";
+
+            echo "\nPattern: $pattern\n";
+
             if (preg_match($pattern, $this->request_string, $matches)) {
+                array_shift($matches); // Drop the first item, it contains the whole match
+                var_dump($matches);
+                var_dump(array_keys($matches));
                 return $route->destination;
             }
         }
@@ -80,6 +88,12 @@ class Romma {
         if ($string[0] !== '/')                     $string = "/{$string}";
         if ($string[(strlen($string)-1)] !== '/')   $string = "{$string}/";
         return $string;
+    }
+
+    private function generateCaptureGroups($pattern) {
+        $quantityModifier = ($this->options['match_empty_sections']) ? '*' : '+';
+
+        return preg_replace('/\{:([A-z]*)\}/', "(?P<$1>[A-z0-9-_.]${quantityModifier})", $pattern);
     }
 }
 
