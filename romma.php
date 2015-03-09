@@ -49,7 +49,8 @@ class Romma {
         $matches = [];
 
         foreach ($this->routes as $route) {
-            if (preg_match("@^" . $route->pattern . "$@{$flags_string}", $this->request_string)) {
+            $pattern = "@^" . $route->pattern . "$@{$flags_string}";
+            if (preg_match($pattern, $this->request_string, $matches)) {
                 return $route->destination;
             }
         }
