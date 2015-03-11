@@ -2,6 +2,15 @@
 
 namespace Romma;
 
+class NoSuchRouteException extends \Exception {}
+
+class Route {
+    public $id;
+    public $method;
+    public $pattern;
+    public $destination;
+}
+
 class Romma {
     const METHOD_ALL = 'ROMMA_ALL';
     const REQUEST_STRING_DEFAULT = '/';
@@ -96,12 +105,3 @@ class Romma {
         return preg_replace('/\{:([A-z]*)\}/', "(?P<$1>[A-z0-9-_.]${quantityModifier})", $pattern);
     }
 }
-
-class Route {
-    public $id;
-    public $method;
-    public $pattern;
-    public $destination;
-}
-
-class NoSuchRouteException extends \Exception {}
