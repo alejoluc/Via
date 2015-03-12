@@ -67,7 +67,6 @@ class Romma {
             if (preg_match($pattern, $this->request_string, $matches)) {
                 array_shift($matches); // Drop the first item, it contains the whole match
                 var_dump($matches);
-                var_dump(array_keys($matches));
                 return $route->destination;
             }
         }
