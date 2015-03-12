@@ -2,8 +2,25 @@
 
 # Romma TO-DO
 
+- [ ] Allow the passing of a Dependency Injection Container
 - [ ] Implement OR
 - [ ] Map several routes to the same dispatch
+
+### Allow the passing of a DIC
+
+```php
+<?php
+$romma->setDIC($app); // Set is as a member?
+
+$romma->add('/api/users/git/{user}', function($request, $app){ // Pass it?
+    $validator = $this->getDIC('app'); // Get it from member?
+    $validator = $app('validator'); // Get it from function call?
+
+    $user = $request->param('user');
+    return $validator->validate('validUsername', $user);
+});
+?>
+```
 
 ### Implement OR
 
