@@ -59,6 +59,9 @@ class Romma {
         $matches = [];
 
         foreach ($this->routes as $route) {
+            // TODO: Check exact string matching first. Probably by returning whether the pattern has
+            // capture groups or not, which is as easy as checking for "(" or by returning an object
+            // instead of a string, an object that contains the pattern and whether it has capture groups
             $route->pattern = $this->generateCaptureGroups($route->pattern);
             $pattern = "@^" . $route->pattern . "$@{$flags_string}";
 
