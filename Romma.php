@@ -20,9 +20,9 @@ class Romma
     const REQUEST_STRING_DEFAULT = '/';
 
     private $routes = [];
-    private $id_counter = 0;
+    private $idCounter = 0;
 
-    private $request_string = null;
+    private $requestString = null;
 
     private $options = [
         'case_insensitive' => true,
@@ -32,7 +32,7 @@ class Romma
     public function add($pattern, $destination, $method = METHOD_ALL)
     {
         $route = new Route;
-        $route->route_id = $this->id_counter++;
+        $route->route_id = $this->idCounter++;
         $route->method = $method;
         $route->pattern = $this->prepareRouteString($pattern);
         $route->destination = $destination;
@@ -48,7 +48,7 @@ class Romma
 
     public function setRequestString($requestString)
     {
-        $this->request_string = $this->prepareRouteString($requestString);
+        $this->requestString = $this->prepareRouteString($requestString);
     }
 
     public function setOptions($options)
@@ -58,8 +58,8 @@ class Romma
 
     public function dispatch()
     {
-        if ($this->request_string === null) {
-            $this->request_string = $this::REQUEST_STRING_DEFAULT;
+        if ($this->requestString === null) {
+            $this->requestString = $this::REQUEST_STRING_DEFAULT;
         }
 
         $this->sortRoutesByPatternLength();
@@ -80,14 +80,14 @@ class Romma
 
             echo "\nPattern: $pattern\n";
 
-            if (preg_match($pattern, $this->request_string, $matches)) {
+            if (preg_match($pattern, $this->requestString, $matches)) {
                 array_shift($matches); // Drop the first item, it contains the whole match
                 var_dump($matches);
                 return $route->destination;
             }
         }
 
-        throw new NoSuchRouteException("The route $this->request_string does not exist");
+        throw new NoSuchRouteException("The route $this->requestString does not exist");
     }
 
     private function sortRoutesByPatternLength()
