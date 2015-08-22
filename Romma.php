@@ -82,12 +82,32 @@ class Romma
 
             if (preg_match($pattern, $this->requestString, $matches)) {
                 array_shift($matches); // Drop the first item, it contains the whole match
+                $this->keepOnlyNamedKeys($matches);
                 var_dump($matches);
                 return $route->destination;
             }
         }
 
         throw new NoSuchRouteException("The route $this->requestString does not exist");
+    }
+
+    /*
+     * When preg_match captures a named group, it puts in the resulting array the result of that capture both in
+     * the named index, but also in a numeric index. I have chosen to remove them. The performance hit, however,
+     * is probably not worth it.
+     *
+     * ATTENTION!! Note that in the dispatch function, when there is a match, I "shift" the first element of the
+     * match. That holds the full string it was compared against. It has an index of 0. If I want to recover that
+     * I have to do it before calling this function. But that is not necessary because the result would be the
+     * same as the request made string.
+     */
+    private function keepOnlyNamedKeys(&$matches)
+    {
+        array_walk($matches, function ($val, $index) use (&$matches) {
+            if (is_int($index)) {
+                unset($matches[$index]);
+            }
+        });
     }
 
     private function sortRoutesByPatternLength()
