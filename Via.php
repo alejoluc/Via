@@ -1,6 +1,6 @@
 <?php
 
-namespace Romma;
+namespace Via;
 
 class NoSuchRouteException extends \Exception
 {
@@ -14,9 +14,9 @@ class Route
     public $destination;
 }
 
-class Romma
+class Via
 {
-    const METHOD_ALL = 'ROMMA_ALL';
+    const METHOD_ALL = 'VIA_ALL';
     const REQUEST_STRING_DEFAULT = '/';
 
     private $routes = [];
