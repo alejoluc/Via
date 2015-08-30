@@ -30,7 +30,7 @@ class Via
         'match_empty_sections' => false
     ];
 
-    public function add($pattern, $destination, $method = METHOD_ALL)
+    public function add($pattern, $destination, $method = self::METHOD_ALL)
     {
         $route = new Route;
         $route->route_id = $this->idCounter++;
@@ -87,7 +87,7 @@ class Via
             echo "\nPattern: $pattern\n";
 
             if (preg_match($pattern, $this->requestString, $matches)) {
-                if ($route->method == METHOD_ALL || $route->method = $this->requestMethod) {
+                if ($route->method == $this::METHOD_ALL || $route->method = $this->requestMethod) {
                     array_shift($matches); // Drop the first item, it contains the whole match
                     $this->keepOnlyNamedKeys($matches);
                     var_dump($matches);
