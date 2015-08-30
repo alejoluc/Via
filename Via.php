@@ -1,6 +1,6 @@
 <?php
 
-namespace Via;
+namespace alejoluc;
 
 class NoSuchRouteException extends \Exception
 {
