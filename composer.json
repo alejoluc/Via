@@ -8,5 +8,12 @@
             "name"  : "Alejo Lucangeli",
             "email" : "alejolucangeli@gmail.com"
         }
-    ]
+    ],
+
+
+    "autoload" : {
+            "psr-4": {
+                "alejoluc\\via\\": "src/"
+            }
+    }
 }
