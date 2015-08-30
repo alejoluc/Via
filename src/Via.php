@@ -23,6 +23,7 @@ class Via
     private $idCounter = 0;
 
     private $requestString = null;
+    private $requestMethod = null;
 
     private $options = [
         'case_insensitive' => true,
@@ -49,6 +50,11 @@ class Via
     public function setRequestString($requestString)
     {
         $this->requestString = $this->prepareRouteString($requestString);
+    }
+
+    public function setRequestMethod($requestMethod)
+    {
+        $this->requestMethod = strtoupper($requestMethod);
     }
 
     public function setOptions($options)
