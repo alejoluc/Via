@@ -1,0 +1,12 @@
+{
+    "name"          : "alejoluc/via",
+    "description"   : "PHP Router",
+    "version"       : "0.1.0-dev",
+
+    "authors"   : [
+        {
+            "name"  : "Alejo Lucangeli",
+            "email" : "alejolucangeli@gmail.com"
+        }
+    ]
+}
