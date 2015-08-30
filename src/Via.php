@@ -88,7 +88,6 @@ class Via
                 if ($route->method === $this::METHOD_ALL || $route->method === $this->requestMethod) {
                     array_shift($matches); // Drop the first item, it contains the whole match
                     $this->keepOnlyNamedKeys($matches);
-                    var_dump($matches);
                     return $route->destination;
                 }
             }
