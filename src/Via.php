@@ -82,9 +82,7 @@ class Via
             // capture groups or not, which is as easy as checking for "(" or by returning an object
             // instead of a string, an object that contains the pattern and whether it has capture groups
             $route->pattern = $this->generateCaptureGroups($route->pattern);
-            $pattern = "@^" . $route->pattern . "$@{$flagsString}"; 
-
-            echo "\nPattern: $pattern\n";
+            $pattern = "@^" . $route->pattern . "$@{$flagsString}";
 
             if (preg_match($pattern, $this->requestString, $matches)) {
                 if ($route->method === $this::METHOD_ALL || $route->method === $this->requestMethod) {
