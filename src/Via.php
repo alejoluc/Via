@@ -68,6 +68,10 @@ class Via
             $this->requestString = $this::REQUEST_STRING_DEFAULT;
         }
 
+        if ($this->requestMethod === null) {
+            $this->requestMethod = (isset($_SERVER['REQUEST_METHOD'])) ? strtoupper($_SERVER['REQUEST_METHOD']) : 'GET';
+        }
+
         $this->sortRoutesByPatternLength();
 
         $flagsString = '';
