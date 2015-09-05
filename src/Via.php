@@ -2,9 +2,9 @@
 
 namespace Via;
 
-class NoSuchRouteException extends \Exception
-{
-}
+class NoSuchRouteException extends \Exception{}
+
+class NoRequestStringSpecifiedException extends \Exception{}
 
 class Route
 {
@@ -17,7 +17,6 @@ class Route
 class Via
 {
     const METHOD_ALL = 'VIA_ALL';
-    const REQUEST_STRING_DEFAULT = '/';
 
     private $routes = [];
     private $idCounter = 0;
@@ -65,7 +64,7 @@ class Via
     public function dispatch()
     {
         if ($this->requestString === null) {
-            $this->requestString = $this::REQUEST_STRING_DEFAULT;
+            throw new NoRequestStringSpecifiedException();
         }
 
         if ($this->requestMethod === null) {
