@@ -55,4 +55,15 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('HomePage', $this->router->dispatch());
     }
 
+    public function testCorrectRouteIsDispatched()
+    {
+        $this->router->setRequestString('/users/list');
+        $this->router->setRequestMethod('GET');
+
+        $this->router->add('users/{:user}/', 'UserMainPage', 'GET');
+        $this->router->add('users/{:user}/posts', 'UserPostsPage', 'GET');
+        $this->router->add('users/list/', 'UsersListPage', 'GET');
+        $this->assertEquals('UsersListPage', $this->router->dispatch());
+    }
+
 }

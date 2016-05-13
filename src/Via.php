@@ -12,17 +12,19 @@ class Route
     public $method;
     public $pattern;
     public $destination;
+    public $is_dynamic;
 }
 
 class Via
 {
     const METHOD_ALL = 'VIA_ALL';
 
-    private $routes = [];
-    private $idCounter = 0;
+    private $routes         = [];
+    private $routes_static  = [];
+    private $idCounter      = 0;
 
-    private $requestString = null;
-    private $requestMethod = null;
+    private $requestString;
+    private $requestMethod;
 
     private $options = [
         'case_insensitive' => true,
@@ -37,13 +39,30 @@ class Via
         $route->pattern = $this->prepareRouteString($pattern);
         $route->destination = $destination;
 
-        $this->routes[] = $route;
+        if ($this->routeIsStatic($route)) {
+            $route->is_dynamic = false;
+            $this->routes_static[] = $route;
+        } else {
+            $route->is_dynamic = true;
+            $this->routes[] = $route;
+        }
         return $route;
     }
 
-    public function getRoutes()
+    public function getStaticRoutes()
+    {
+        return $this->routes_static;
+    }
+
+    public function getDynamicRoutes()
     {
         return $this->routes;
+    }
+
+
+    public function getRoutes()
+    {
+        return array_merge($this->routes_static, $this->routes);
     }
 
     public function setRequestString($requestString)
@@ -66,11 +85,18 @@ class Via
         if ($this->requestString === null) {
             throw new NoRequestStringSpecifiedException();
         }
-
         if ($this->requestMethod === null) {
-            $this->requestMethod = (isset($_SERVER['REQUEST_METHOD'])) ? strtoupper($_SERVER['REQUEST_METHOD']) : 'GET';
+            $this->requestMethod = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : 'GET';
         }
 
+        // static?
+        foreach ($this->routes_static as $static_route) {
+            if ($this->requestString === $static_route->pattern && $this->requestMethod === $static_route->method) {
+                return $static_route->destination;
+            }
+        }
+
+        // no static match. lets try dynamic
         $this->sortRoutesByPatternLength();
 
         $flagsString = '';
@@ -81,9 +107,6 @@ class Via
         $matches = [];
 
         foreach ($this->routes as $route) {
-            // TODO: Check exact string matching first. Probably by returning whether the pattern has
-            // capture groups or not, which is as easy as checking for "(" or by returning an object
-            // instead of a string, an object that contains the pattern and whether it has capture groups
             $route->pattern = $this->generateCaptureGroups($route->pattern);
             $pattern = "@^" . $route->pattern . "$@{$flagsString}";
 
@@ -122,7 +145,7 @@ class Via
     {
         // Sort routes by length
         // The longest ones should be compared to the request first
-        // Otherwise a shorter pattern that starts the same way may handle it
+        // Otherwise a shorter pattern that starts the same way *may* handle it (TODO: you sure?)
         usort($this->routes, function ($a, $b) {
             return strlen($a->pattern) < strlen($b->pattern);
         });
@@ -132,12 +155,13 @@ class Via
     {
         $string = trim($string);
         $string = $this->ensurePreAndPostSlashes($string);
+        $string = strtolower($string);
         return $string;
     }
 
     private function ensurePreAndPostSlashes($string = '')
     {
-        if (strlen($string) === 0) {
+        if ($string === '') {
             return '/';
         }
 
@@ -153,8 +177,14 @@ class Via
 
     private function generateCaptureGroups($pattern)
     {
-        $quantityModifier = ($this->options['match_empty_sections']) ? '*' : '+';
+        $quantityModifier = $this->options['match_empty_sections'] ? '*' : '+';
 
         return preg_replace('/\{:([A-z]*)\}/', "(?P<$1>[A-z0-9-_.]${quantityModifier})", $pattern);
+    }
+
+    private function routeIsStatic($route)
+    {
+        // benchmarks against strpos() showed preg_match was consistently faster across php versions
+        return preg_match('/\{/', $route->pattern) !== 1;
     }
 }
