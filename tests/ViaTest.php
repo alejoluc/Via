@@ -94,4 +94,14 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->dispatch();
     }
 
+    public function testDispatcherReturnsArrayIfSpecified()
+    {
+        $this->router->setRequestString('/users/alejo');
+        $this->router->setRequestMethod('GET');
+
+        $this->router->add('users/{:user}', ['UsersController', 'showUserPage']);
+        
+        $this->assertEquals(['UsersController', 'showUserPage'], $this->router->dispatch());
+    }
+
 }
