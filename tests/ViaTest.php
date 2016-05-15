@@ -64,21 +64,9 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->add('users/{:user}/posts', 'UserPostsPage', 'GET');
         $this->router->add('users/list/', 'UsersListPage', 'GET');
         $this->assertEquals('UsersListPage', $this->router->dispatch());
-    }
 
-    public function testDynamicRouteDispatches()
-    {
-        $this->router->setRequestString('/users/alejo/posts');
-        $this->router->setRequestMethod('GET');
-
-        $this->router->add('users/{:user}/', 'UserMainPage', 'GET');
-        $this->router->add('users/{:user}/posts', 'UserPostsPage', 'GET');
-        $this->router->add('users/list/', 'UsersListPage', 'GET');
-
-        $withFilters = $this->router->add('users/{:user}/posts/{:month}', 'UserPostsPageByMonth', 'GET');
-        $withFilters->filter('month', '[0-9]{1,2}');
-
-        $this->assertEquals('UserPostsPage', $this->router->dispatch());
+        $this->router->setRequestString('users/alejo/');
+        $this->assertEquals('UserMainPage', $this->router->dispatch());
     }
 
     public function testCustomFiltersSatisfied()
