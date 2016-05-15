@@ -2,19 +2,6 @@
 
 namespace Via;
 
-class NoSuchRouteException extends \Exception{}
-
-class NoRequestStringSpecifiedException extends \Exception{}
-
-class Route
-{
-    public $route_id;
-    public $method;
-    public $pattern;
-    public $destination;
-    public $is_dynamic;
-}
-
 class Via
 {
     const METHOD_ALL = 'VIA_ALL';
@@ -27,8 +14,7 @@ class Via
     private $requestMethod;
 
     private $options = [
-        'case_insensitive' => true,
-        'match_empty_sections' => false
+        'case_insensitive' => true
     ];
 
     public function add($pattern, $destination, $method = self::METHOD_ALL)
@@ -107,7 +93,7 @@ class Via
         $matches = [];
 
         foreach ($this->routes as $route) {
-            $route->pattern = $this->generateCaptureGroups($route->pattern);
+            $route->pattern = $route->generateCaptureGroups($route->pattern);
             $pattern = "@^" . $route->pattern . "$@{$flagsString}";
 
             if (preg_match($pattern, $this->requestString, $matches)) {
@@ -175,12 +161,7 @@ class Via
         return $string;
     }
 
-    private function generateCaptureGroups($pattern)
-    {
-        $quantityModifier = $this->options['match_empty_sections'] ? '*' : '+';
 
-        return preg_replace('/\{:([A-z]*)\}/', "(?P<$1>[A-z0-9-_.]${quantityModifier})", $pattern);
-    }
 
     private function routeIsStatic($route)
     {
