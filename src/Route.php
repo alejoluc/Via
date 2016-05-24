@@ -30,4 +30,10 @@ class Route
             return '(?P<' . $paramName . '>[A-z0-9-_.]+)';
         }
     }
+
+    public function isStatic()
+    {
+        // benchmarks against strpos() showed preg_match was consistently faster across php versions
+        return preg_match('/\{/', $this->pattern) !== 1;
+    }
 }

@@ -25,7 +25,7 @@ class Via
         $route->pattern = $this->prepareRouteString($pattern);
         $route->destination = $destination;
 
-        if ($this->routeIsStatic($route)) {
+        if ($route->isStatic()) {
             $route->is_dynamic = false;
             $this->routes_static[] = $route;
         } else {
@@ -159,13 +159,5 @@ class Via
             $string = "{$string}/";
         }
         return $string;
-    }
-
-
-
-    private function routeIsStatic($route)
-    {
-        // benchmarks against strpos() showed preg_match was consistently faster across php versions
-        return preg_match('/\{/', $route->pattern) !== 1;
     }
 }
