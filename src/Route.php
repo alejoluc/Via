@@ -14,6 +14,7 @@ class Route
 
     public function filter($paramName, $filter) {
         $this->filters[$paramName] = $filter;
+        return $this;
     }
 
     public function generateCaptureGroups($pattern)

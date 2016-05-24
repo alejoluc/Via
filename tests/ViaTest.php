@@ -104,4 +104,17 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(['UsersController', 'showUserPage'], $this->router->dispatch());
     }
 
+    public function testFluentInterface()
+    {
+        $this->router->setRequestString('/users/alejo/posts/9650');
+        $this->router->setRequestMethod('GET');
+
+        $destination = ['UserController', 'UserPostView'];
+        $this->router->add('users/{:user}/posts/{:post_id}', $destination)
+                     ->filter('user', '\w+')
+                     ->filter('post_id', '\d+');
+        
+        $this->assertEquals($destination, $this->router->dispatch());
+    }
+
 }
