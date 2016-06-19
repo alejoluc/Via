@@ -49,10 +49,10 @@ class ViaTest extends PHPUnit_Framework_TestCase
 
         $this->router->add('home', 'HomePage', 'GET');
         $this->router->add('home', 'HomePagePost', 'POST');
-        $this->assertEquals('HomePagePost', $this->router->dispatch());
+        $this->assertEquals('HomePagePost', $this->router->dispatch()->destination);
 
         $this->router->setRequestMethod('GET');
-        $this->assertEquals('HomePage', $this->router->dispatch());
+        $this->assertEquals('HomePage', $this->router->dispatch()->destination);
     }
 
     public function testCorrectRouteIsDispatched()
@@ -63,10 +63,10 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->add('users/{:user}/', 'UserMainPage', 'GET');
         $this->router->add('users/{:user}/posts', 'UserPostsPage', 'GET');
         $this->router->add('users/list/', 'UsersListPage', 'GET');
-        $this->assertEquals('UsersListPage', $this->router->dispatch());
+        $this->assertEquals('UsersListPage', $this->router->dispatch()->destination);
 
         $this->router->setRequestString('users/alejo/');
-        $this->assertEquals('UserMainPage', $this->router->dispatch());
+        $this->assertEquals('UserMainPage', $this->router->dispatch()->destination);
     }
 
     public function testCustomFiltersSatisfied()
@@ -77,7 +77,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $withFilters = $this->router->add('users/{:user}/posts/{:month}', 'UserPostsPageByMonth', 'GET');
         $withFilters->filter('month', '[0-9]{1,2}');
 
-        $this->assertEquals('UserPostsPageByMonth', $this->router->dispatch());
+        $this->assertEquals('UserPostsPageByMonth', $this->router->dispatch()->destination);
     }
 
     /**
@@ -101,7 +101,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
 
         $this->router->add('users/{:user}', ['UsersController', 'showUserPage']);
         
-        $this->assertEquals(['UsersController', 'showUserPage'], $this->router->dispatch());
+        $this->assertEquals(['UsersController', 'showUserPage'], $this->router->dispatch()->destination);
     }
 
     public function testFluentInterface()
@@ -114,7 +114,16 @@ class ViaTest extends PHPUnit_Framework_TestCase
                      ->filter('user', '\w+')
                      ->filter('post_id', '\d+');
         
-        $this->assertEquals($destination, $this->router->dispatch());
+        $this->assertEquals($destination, $this->router->dispatch()->destination);
+    }
+
+    public function testReturnsParameters() {
+        $this->router->setRequestString('/users/alejo/posts');
+        $this->router->setRequestMethod('GET');
+
+        $this->router->add('/users/{:username}/posts', ['UserController', 'listPosts'], 'GET');
+
+        $this->assertEquals('alejo', $this->router->dispatch()->parameters->username);
     }
 
 }

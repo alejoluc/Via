@@ -19,7 +19,7 @@ class Route
 
     public function generateCaptureGroups($pattern)
     {
-        $generatedRegex = preg_replace_callback('/\{:([A-z]*)\}/', [$this, 'replaceCustomFilters'], $pattern);
+        $generatedRegex = preg_replace_callback('/\{:([A-z0-9-_.]+)\}/', [$this, 'replaceCustomFilters'], $pattern);
         return $generatedRegex;
     }
 

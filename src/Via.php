@@ -68,6 +68,7 @@ class Via
 
     public function dispatch()
     {
+        $oret = new \stdClass;
         if ($this->requestString === null) {
             throw new NoRequestStringSpecifiedException();
         }
@@ -78,7 +79,8 @@ class Via
         // static?
         foreach ($this->routes_static as $static_route) {
             if ($this->requestString === $static_route->pattern && $this->requestMethod === $static_route->method) {
-                return $static_route->destination;
+                $oret->destination = $static_route->destination;
+                return $oret;
             }
         }
 
@@ -100,7 +102,10 @@ class Via
                 if ($route->method === $this::METHOD_ALL || $route->method === $this->requestMethod) {
                     array_shift($matches); // Drop the first item, it contains the whole match
                     $this->keepOnlyNamedKeys($matches);
-                    return $route->destination;
+                    
+                    $oret->destination = $route->destination;
+                    $oret->parameters = (object)$matches;
+                    return $oret;
                 }
             }
         }
