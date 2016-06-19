@@ -35,6 +35,22 @@ class Via
         return $route;
     }
 
+    public function get($pattern, $destination) {
+        return $this->add($pattern, $destination, 'GET');
+    }
+
+    public function post($pattern, $destination) {
+        return $this->add($pattern, $destination, 'POST');
+    }
+
+    public function put($pattern, $destination) {
+        return $this->add($pattern, $destination, 'PUT');
+    }
+
+    public function delete($pattern, $destination) {
+        return $this->add($pattern, $destination, 'DELETE');
+    }
+
     public function getStaticRoutes()
     {
         return $this->routes_static;
