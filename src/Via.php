@@ -94,9 +94,11 @@ class Via
 
         // static?
         foreach ($this->routes_static as $static_route) {
-            if ($this->requestString === $static_route->pattern && $this->requestMethod === $static_route->method) {
-                $oret->destination = $static_route->destination;
-                return $oret;
+            if ($static_route->method === $this->requestMethod || $static_route->method === $this::METHOD_ALL) {
+                if ($this->requestString === $static_route->pattern) {
+                    $oret->destination = $static_route->destination;
+                    return $oret;
+                }
             }
         }
 
@@ -109,10 +111,11 @@ class Via
         }
 
         $matches = [];
-
         foreach ($this->routes as $route) {
+
             $route->pattern = $route->generateCaptureGroups($route->pattern);
             $pattern = "@^" . $route->pattern . "$@{$flagsString}";
+
 
             if (preg_match($pattern, $this->requestString, $matches)) {
                 if ($route->method === $this::METHOD_ALL || $route->method === $this->requestMethod) {
