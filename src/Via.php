@@ -85,6 +85,10 @@ class Via
     public function dispatch()
     {
         $oret = new \stdClass;
+        $oret->destination = '';
+        $oret->found       = false;
+        $oret->parameters  = [];
+
         if ($this->requestString === null) {
             throw new NoRequestStringSpecifiedException();
         }
@@ -96,6 +100,7 @@ class Via
         foreach ($this->routes_static as $static_route) {
             if ($static_route->method === $this->requestMethod || $static_route->method === $this::METHOD_ALL) {
                 if ($this->requestString === $static_route->pattern) {
+                    $oret->found = true;
                     $oret->destination = $static_route->destination;
                     return $oret;
                 }
@@ -123,13 +128,14 @@ class Via
                     $this->keepOnlyNamedKeys($matches);
                     
                     $oret->destination = $route->destination;
+                    $oret->found = true;
                     $oret->parameters = (object)$matches;
                     return $oret;
                 }
             }
         }
 
-        throw new NoSuchRouteException("The route $this->requestString does not exist");
+        return $oret;
     }
 
     /*
