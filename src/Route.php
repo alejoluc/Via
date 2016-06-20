@@ -26,9 +26,9 @@ class Route
     public function replaceCustomFilters($matches) {
         $paramName = $matches[1];
         if (isset($this->filters[$paramName])) {
-            return '(?P<' . $paramName . '>' . $this->filters[$paramName] . ')';
+            return '(' . $this->filters[$paramName] . ')';
         } else {
-            return '(?P<' . $paramName . '>[A-z0-9-_.]+)';
+            return '(' . '[A-z0-9-_.]+)';
         }
     }
 
