@@ -6,12 +6,18 @@ class Via
 {
     const METHOD_ALL = 'VIA_ALL';
 
+    const FILTER_NUMERIC      = '\d+';
+    const FILTER_ONLYLETTERS  = '[A-z]+';
+    const FILTER_ALPHANUMERIC = '\w+'; // Includes the underscore character!
+
     private $routes         = [];
     private $routes_static  = [];
     private $idCounter      = 0;
 
     private $requestString;
     private $requestMethod;
+
+    private $filters = [];
 
     private $options = [
         'case_insensitive' => true
@@ -51,6 +57,11 @@ class Via
         return $this->add($pattern, $destination, 'DELETE');
     }
 
+    public function registerFilter($name, callable $callback) {
+        $this->filters[$name] = $callback;
+        return $this;
+    }
+
     public function getStaticRoutes()
     {
         return $this->routes_static;
@@ -82,13 +93,12 @@ class Via
         $this->options = array_merge($this->options, $options);
     }
 
-    public function dispatch()
-    {
-        $oret = new \stdClass;
-        $oret->destination = '';
-        $oret->found       = false;
-        $oret->parameters  = [];
+    private function createBareMatch() {
+        $match = new Match();
+        return $match;
+    }
 
+    public function dispatch() {
         if ($this->requestString === null) {
             throw new NoRequestStringSpecifiedException();
         }
@@ -96,46 +106,54 @@ class Via
             $this->requestMethod = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : 'GET';
         }
 
-        // static?
-        foreach ($this->routes_static as $static_route) {
-            if ($static_route->method === $this->requestMethod || $static_route->method === $this::METHOD_ALL) {
-                if ($this->requestString === $static_route->pattern) {
-                    $oret->found = true;
-                    $oret->destination = $static_route->destination;
-                    return $oret;
-                }
-            }
-        }
-
-        // no static match. lets try dynamic
-        $this->sortRoutesByPatternLength();
+        $this->sortRoutesByPatternLength(); // This will sort the dynamic routes
+        $allRoutes = array_merge($this->routes_static, $this->routes);
 
         $flagsString = '';
         if ($this->options['case_insensitive']) {
             $flagsString .= 'i';
         }
+        $parameterMatches = [];
 
-        $matches = [];
-        foreach ($this->routes as $route) {
+        $match = $this->createBareMatch();
 
+        foreach  ($allRoutes as $route) {
             $route->pattern = $route->generateCaptureGroups($route->pattern);
             $pattern = "@^" . $route->pattern . "$@{$flagsString}";
-
-
-            if (preg_match($pattern, $this->requestString, $matches)) {
+            if (preg_match($pattern, $this->requestString, $parameterMatches)) {
                 if ($route->method === $this::METHOD_ALL || $route->method === $this->requestMethod) {
-                    array_shift($matches); // Drop the first item, it contains the whole match
-                    $this->keepOnlyNumericKeys($matches);
-                    
-                    $oret->destination = $route->destination;
-                    $oret->found = true;
-                    $oret->parameters = $matches;
-                    return $oret;
+                    array_shift($parameterMatches); // Drop the first item, it contains the whole match
+                    $this->keepOnlyNumericKeys($parameterMatches);
+                    $match->setResult($route->destination);
+                    $match->setMatchFound(true);
+                    $match->setParameters($parameterMatches);
+                    $match->setFilters($route->filters);
+                    break;
                 }
             }
         }
 
-        return $oret;
+        if (!$match->getMatchFound()) { // No match, we can return early
+            return $match;
+        }
+
+        // There is a match, lets see if the filters pass
+        foreach ($match->getFilters() as $filter) {
+            $filterResult = false;
+            if (is_callable($filter)) {
+                $filterResult = call_user_func($filter);
+            } elseif (is_string($filter)) {
+                // Its a string (check that!) so its supposed to be registered in the Router
+                $filterCallback = $this->filters[$filter];
+                $filterResult = call_user_func($filterCallback);
+            }
+            if ($filterResult !== true) {
+                $match->setFilterError($filterResult);
+                break;
+            }
+        }
+
+        return $match;
     }
 
     private function keepOnlyNumericKeys(&$matches) {

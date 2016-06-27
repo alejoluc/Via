@@ -11,13 +11,11 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router = new Via\Via;
     }
 
-    /**
-     * @expectedException \Via\NoSuchRouteException
-     */
-    public function testNoRouteThrowsException()
+    public function testNoRouteReturnsFalseOnFoundField()
     {
         $this->router->setRequestString('home');
-        $this->router->dispatch();
+        $result = $this->router->dispatch();
+        $this->assertEquals(false, $result->getMatchFound());
     }
 
     /**
@@ -30,16 +28,36 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->dispatch();
     }
 
-    /**
-     * @expectedException \Via\NoSuchRouteException
-     */
-    public function testRouteExistsButNotForThatRequestMethod()
+    public function testRouteExistsButNotForThatRequestMethodReturnsFalseOnFound()
     {
         $this->router->setRequestString('home');
         $this->router->setRequestMethod('GET');
 
         $this->router->add('home', 'HomePage', 'POST');
-        $this->router->dispatch();
+        $result = $this->router->dispatch();
+        $this->assertEquals(false, $result->getMatchFound());
+    }
+
+    /**
+     * @expectedException \Via\ViaException
+     */
+    public function testExceptionWhenAccessMatchResultIfNoMatchFound() {
+        $this->router->setRequestString('/users/alejo/posts');
+        $this->router->setRequestMethod('GET');
+
+        $this->router->get('/unused/route', 'Generic endpoint');
+
+        $match = $this->router->dispatch();
+        $result = $match->getResult();
+    }
+
+    public function testOnRouteFoundReturnsMatchObject() {
+        $this->router->setRequestString('home');
+        $this->router->setRequestMethod('GET');
+
+        $this->router->add('home', 'HomePage', 'GET');
+        $res = $this->router->dispatch();
+        $this->assertTrue($res instanceof \Via\Match);        
     }
 
     public function testDispatchesToCorrectRouteByMethod()
@@ -49,10 +67,10 @@ class ViaTest extends PHPUnit_Framework_TestCase
 
         $this->router->add('home', 'HomePage', 'GET');
         $this->router->add('home', 'HomePagePost', 'POST');
-        $this->assertEquals('HomePagePost', $this->router->dispatch()->destination);
+        $this->assertEquals('HomePagePost', $this->router->dispatch()->getResult());
 
         $this->router->setRequestMethod('GET');
-        $this->assertEquals('HomePage', $this->router->dispatch()->destination);
+        $this->assertEquals('HomePage', $this->router->dispatch()->getResult());
     }
 
     public function testCorrectRouteIsDispatched()
@@ -63,35 +81,33 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->add('users/{:user}/', 'UserMainPage', 'GET');
         $this->router->add('users/{:user}/posts', 'UserPostsPage', 'GET');
         $this->router->add('users/list/', 'UsersListPage', 'GET');
-        $this->assertEquals('UsersListPage', $this->router->dispatch()->destination);
+        $this->assertEquals('UsersListPage', $this->router->dispatch()->getResult());
 
         $this->router->setRequestString('users/alejo/');
-        $this->assertEquals('UserMainPage', $this->router->dispatch()->destination);
+        $this->assertEquals('UserMainPage', $this->router->dispatch()->getResult());
     }
 
-    public function testCustomFiltersSatisfied()
+    public function testCustomConstraintsSatisfied()
     {
         $this->router->setRequestString('/users/alejo/posts/12');
         $this->router->setRequestMethod('GET');
 
-        $withFilters = $this->router->add('users/{:user}/posts/{:month}', 'UserPostsPageByMonth', 'GET');
-        $withFilters->filter('month', '[0-9]{1,2}');
+        $withConstraints = $this->router->add('users/{:user}/posts/{:month}', 'UserPostsPageByMonth', 'GET');
+        $withConstraints->where('month', '[0-9]{1,2}');
 
-        $this->assertEquals('UserPostsPageByMonth', $this->router->dispatch()->destination);
+        $this->assertEquals('UserPostsPageByMonth', $this->router->dispatch()->getResult());
     }
 
-    /**
-     * @expectedException \Via\NoSuchRouteException
-     */
-    public function testCustomFiltersNotSatisfied()
+    public function testCustomConstraintsNotSatisfiedReturnFalseOnFound()
     {
         $this->router->setRequestString('/users/alejo/posts/123');
         $this->router->setRequestMethod('GET');
 
-        $withFilters = $this->router->add('users/{:user}/posts/{:month}', 'UserPostsPageByMonth', 'GET');
-        $withFilters->filter('month', '[0-9]{1,2}');
+        $withConstraints = $this->router->add('users/{:user}/posts/{:month}', 'UserPostsPageByMonth', 'GET');
+        $withConstraints->where('month', '[0-9]{1,2}');
 
-        $this->router->dispatch();
+        $result = $this->router->dispatch();
+        $this->assertEquals(false, $result->getMatchFound());
     }
 
     public function testDispatcherReturnsArrayIfSpecified()
@@ -101,7 +117,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
 
         $this->router->add('users/{:user}', ['UsersController', 'showUserPage']);
         
-        $this->assertEquals(['UsersController', 'showUserPage'], $this->router->dispatch()->destination);
+        $this->assertEquals(['UsersController', 'showUserPage'], $this->router->dispatch()->getResult());
     }
 
     public function testFluentInterface()
@@ -111,10 +127,10 @@ class ViaTest extends PHPUnit_Framework_TestCase
 
         $destination = ['UserController', 'UserPostView'];
         $this->router->add('users/{:user}/posts/{:post_id}', $destination)
-                     ->filter('user', '\w+')
-                     ->filter('post_id', '\d+');
+                     ->where('user', '\w+')
+                     ->where('post_id', '\d+');
         
-        $this->assertEquals($destination, $this->router->dispatch()->destination);
+        $this->assertEquals($destination, $this->router->dispatch()->getResult());
     }
 
     public function testReturnsParameters() {
@@ -122,8 +138,52 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestMethod('GET');
 
         $this->router->add('/users/{:username}/posts', ['UserController', 'listPosts'], 'GET');
+        $this->assertEquals('alejo', $this->router->dispatch()->getParameters()[0]);
+    }
 
-        $this->assertEquals('alejo', $this->router->dispatch()->parameters->username);
+    public function testFilterRegisteredInRouter() {
+        $this->router->setRequestString('/users/alejo/posts');
+        $this->router->setRequestMethod('GET');
+
+        $this->router->get('/users/{:user}/posts', 'Generic route endpoint')->filter('testFilter');
+
+        $this->router->registerFilter('testFilter', function(){
+            return 'Filter fail message';
+        });
+
+        $match = $this->router->dispatch();
+
+        $this->assertFalse($match->filtersPass());
+        $this->assertEquals('Filter fail message', $match->getFilterError());
+    }
+
+    public function testFilterCreatedInRoute() {
+        $this->router->setRequestString('/users/alejo/posts');
+        $this->router->setRequestMethod('GET');
+
+        $this->router->get('/users/{:user}/posts', 'Generic route endpoint')->filter(function(){
+            return 'Filter fail message';
+        });
+
+        $match = $this->router->dispatch();
+
+        $this->assertFalse($match->filtersPass());
+        $this->assertEquals('Filter fail message', $match->getFilterError());
+    }
+
+    /**
+     * @expectedException \Via\ViaException
+     */
+    public function testExceptionWhenAccessMatchResultIfFiltersFail() {
+        $this->router->setRequestString('/users/alejo/posts');
+        $this->router->setRequestMethod('GET');
+
+        $this->router->get('/users/{:user}/posts', 'Generic route endpoint')->filter(function(){
+            return 'Filter fail message';
+        });
+
+        $match = $this->router->dispatch();
+        $result = $match->getResult();
     }
 
 }

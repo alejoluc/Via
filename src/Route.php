@@ -10,23 +10,30 @@ class Route
     public $destination;
     public $is_dynamic;
 
-    public $filters = [];
+    public $constraints = [];
 
-    public function filter($paramName, $filter) {
-        $this->filters[$paramName] = $filter;
+    public $filters     = [];
+    public $filters_err = [];
+
+    public function where($paramName, $regex) {
+        $this->constraints[$paramName] = $regex;
         return $this;
+    }
+
+    public function filter($filter) {
+        $this->filters[] = $filter;
     }
 
     public function generateCaptureGroups($pattern)
     {
-        $generatedRegex = preg_replace_callback('/\{:([A-z0-9-_.]+)\}/', [$this, 'replaceCustomFilters'], $pattern);
+        $generatedRegex = preg_replace_callback('/\{:([A-z0-9-_.]+)\}/', [$this, 'replaceCustomConstraints'], $pattern);
         return $generatedRegex;
     }
 
-    public function replaceCustomFilters($matches) {
+    public function replaceCustomConstraints($matches) {
         $paramName = $matches[1];
-        if (isset($this->filters[$paramName])) {
-            return '(' . $this->filters[$paramName] . ')';
+        if (isset($this->constraints[$paramName])) {
+            return '(' . $this->constraints[$paramName] . ')';
         } else {
             return '(' . '[A-z0-9-_.]+)';
         }
