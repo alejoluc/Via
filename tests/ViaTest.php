@@ -15,7 +15,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
     {
         $this->router->setRequestString('home');
         $result = $this->router->dispatch();
-        $this->assertEquals(false, $result->getMatchFound());
+        $this->assertEquals(false, $result->isMatch());
     }
 
     /**
@@ -35,7 +35,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
 
         $this->router->add('home', 'HomePage', 'POST');
         $result = $this->router->dispatch();
-        $this->assertEquals(false, $result->getMatchFound());
+        $this->assertEquals(false, $result->isMatch());
     }
 
     /**
@@ -107,7 +107,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $withConstraints->where('month', '[0-9]{1,2}');
 
         $result = $this->router->dispatch();
-        $this->assertEquals(false, $result->getMatchFound());
+        $this->assertEquals(false, $result->isMatch());
     }
 
     public function testDispatcherReturnsArrayIfSpecified()

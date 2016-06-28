@@ -24,7 +24,7 @@ class Match {
 	}
 
 	public function getResult() {
-		if (!$this->getMatchFound()) {
+		if (!$this->isMatch()) {
 			throw new ViaException('Can\'t retrieve result for inexistent match');
 		}
 		if (!$this->filtersPass()) {
@@ -45,7 +45,7 @@ class Match {
 		$this->matchFound = $matchFound;
 	}
 
-	public function getMatchFound() {
+	public function isMatch() {
 		return $this->matchFound === true;
 	}
 

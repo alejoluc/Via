@@ -133,7 +133,7 @@ class Via
             }
         }
 
-        if (!$match->getMatchFound()) { // No match, we can return early
+        if (!$match->isMatch()) { // No match, we can return early
             return $match;
         }
 
