@@ -93,12 +93,13 @@ class Via
         $this->options = array_merge($this->options, $options);
     }
 
-    private function createBareMatch() {
-        $match = new Match();
-        return $match;
-    }
-
-    public function dispatch() {
+    /**
+     * @param callable|null $handler
+     * @return mixed|Match If no handler is given, returns a Match object. If a handler is given, it returns the result
+     * of the call, after passing it the Match
+     * @throws NoRequestStringSpecifiedException
+     */
+    public function dispatch(callable $handler = null) {
         if ($this->requestString === null) {
             throw new NoRequestStringSpecifiedException();
         }
@@ -108,15 +109,16 @@ class Via
 
         $this->sortRoutesByPatternLength(); // This will sort the dynamic routes
         $allRoutes = array_merge($this->routes_static, $this->routes);
-
         $flagsString = '';
         if ($this->options['case_insensitive']) {
             $flagsString .= 'i';
         }
+
         $parameterMatches = [];
 
-        $match = $this->createBareMatch();
+        $routeMatch = new Match();
 
+        /** @var Route $route */
         foreach  ($allRoutes as $route) {
             $route->pattern = $route->generateCaptureGroups($route->pattern);
             $pattern = "@^" . $route->pattern . "$@{$flagsString}";
@@ -124,21 +126,25 @@ class Via
                 if ($route->method === $this::METHOD_ALL || $route->method === $this->requestMethod) {
                     array_shift($parameterMatches); // Drop the first item, it contains the whole match
                     $this->keepOnlyNumericKeys($parameterMatches);
-                    $match->setResult($route->destination);
-                    $match->setMatchFound(true);
-                    $match->setParameters($parameterMatches);
-                    $match->setFilters($route->filters);
+                    $routeMatch->setResult($route->destination);
+                    $routeMatch->setMatchFound(true);
+                    $routeMatch->setParameters($parameterMatches);
+                    $routeMatch->setFilters($route->filters);
                     break;
                 }
             }
         }
 
-        if (!$match->isMatch()) { // No match, we can return early
-            return $match;
+        if (!$routeMatch->isMatch()) { // No match, we can return early
+            if (is_callable($handler)) {
+                return call_user_func($handler, $routeMatch);
+            } else {
+                return $routeMatch;
+            }
         }
 
         // There is a match, lets see if the filters pass
-        foreach ($match->getFilters() as $filter) {
+        foreach ($routeMatch->getFilters() as $filter) {
             $filterResult = false;
             if (is_callable($filter)) {
                 $filterResult = call_user_func($filter);
@@ -148,12 +154,16 @@ class Via
                 $filterResult = call_user_func($filterCallback);
             }
             if ($filterResult !== true) {
-                $match->setFilterError($filterResult);
+                $routeMatch->setFilterError($filterResult);
                 break;
             }
         }
 
-        return $match;
+        if (is_callable($handler)) {
+            return call_user_func($handler, $routeMatch);
+        } else {
+            return $routeMatch;
+        }
     }
 
     private function keepOnlyNumericKeys(&$matches) {
