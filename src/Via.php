@@ -17,6 +17,9 @@ class Via
     private $requestString;
     private $requestMethod;
 
+    /** @var callable $routeMatchHandler */
+    private $routeMatchHandler;
+
     private $filters = [];
 
     private $options = [
@@ -93,13 +96,21 @@ class Via
         $this->options = array_merge($this->options, $options);
     }
 
+    public function setRouteMatchHandler(callable $handler) {
+        $this->routeMatchHandler = $handler;
+    }
+
+    public function getRouteMatchHandler() {
+        return $this->routeMatchHandler;
+    }
+
     /**
      * @param callable|null $handler
      * @return mixed|Match If no handler is given, returns a Match object. If a handler is given, it returns the result
      * of the call, after passing it the Match
      * @throws NoRequestStringSpecifiedException
      */
-    public function dispatch(callable $handler = null) {
+    public function dispatch() {
         if ($this->requestString === null) {
             throw new NoRequestStringSpecifiedException();
         }
@@ -136,8 +147,8 @@ class Via
         }
 
         if (!$routeMatch->isMatch()) { // No match, we can return early
-            if (is_callable($handler)) {
-                return call_user_func($handler, $routeMatch);
+            if (is_callable($this->getRouteMatchHandler())) {
+                return call_user_func($this->getRouteMatchHandler(), $routeMatch);
             } else {
                 return $routeMatch;
             }
@@ -159,8 +170,8 @@ class Via
             }
         }
 
-        if (is_callable($handler)) {
-            return call_user_func($handler, $routeMatch);
+        if (is_callable($this->getRouteMatchHandler())) {
+            return call_user_func($this->getRouteMatchHandler(), $routeMatch);
         } else {
             return $routeMatch;
         }
