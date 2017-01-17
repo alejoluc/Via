@@ -35,7 +35,7 @@ class Route
         if (isset($this->constraints[$paramName])) {
             return '(' . $this->constraints[$paramName] . ')';
         } else {
-            return '(' . '[A-z0-9-_.]+)';
+            return '(' . Via::FILTER_ALPHANUMERIC .'+)';
         }
     }
 

@@ -50,7 +50,11 @@ class Via
         $route->method = $method;
 
         if (count($this->prefixes) > 0) {
-            $pattern_prefix = implode('/', $this->prefixes) . '/';
+            $pattern_prefix = implode('/', $this->prefixes);
+            if (strpos($pattern, '/') !== 0) {
+                // If the pattern doesn't start with /, add a slash between prefix and pattern
+                $pattern_prefix .= '/';
+            }
             $pattern = $pattern_prefix . $pattern;
         }
 
