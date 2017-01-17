@@ -3,12 +3,12 @@
 class ViaTest extends PHPUnit_Framework_TestCase
 {
 
-    /** @var $router \Via\Via */
+    /** @var $router alejoluc\Via\Router */
     private $router;
 
     public function setUp()
     {
-        $this->router = new Via\Via;
+        $this->router = new alejoluc\Via\Router();
     }
 
     public function testNoRouteReturnsFalseOnFoundField()
@@ -19,7 +19,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Via\NoRequestStringSpecifiedException
+     * @expectedException alejoluc\Via\NoRequestStringSpecifiedException
      */
     public function testNoRequestStringThrowsException()
     {
@@ -39,7 +39,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Via\ViaException
+     * @expectedException alejoluc\Via\ViaException
      */
     public function testExceptionWhenAccessMatchResultIfNoMatchFound() {
         $this->router->setRequestString('/users/alejo/posts');
@@ -57,7 +57,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
 
         $this->router->add('home', 'HomePage', 'GET');
         $res = $this->router->dispatch();
-        $this->assertTrue($res instanceof \Via\Match);        
+        $this->assertTrue($res instanceof alejoluc\Via\Match);
     }
 
     public function testDispatchesToCorrectRouteByMethod()
@@ -172,7 +172,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Via\ViaException
+     * @expectedException alejoluc\Via\ViaException
      */
     public function testExceptionWhenAccessMatchResultIfFiltersFail() {
         $this->router->setRequestString('/users/alejo/posts');
