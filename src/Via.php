@@ -218,4 +218,6 @@ class Via
         }
         return $string;
     }
-}
+}    public function __construct() {
+        $this->setRouteMatchHandler([new DefaultMatchHandler(), 'handle']);
+    }
