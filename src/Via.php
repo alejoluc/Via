@@ -26,11 +26,34 @@ class Via
         'case_insensitive' => true
     ];
 
+
+    private $prefixes = [];
+
+    public function __construct() {
+        $this->setRouteMatchHandler([new DefaultMatchHandler(), 'handle']);
+    }
+
+    public function group($prefix, $callback) {
+        if (substr($prefix, 0, 1) === '/') { $prefix = substr($prefix, 1); }
+        if (substr($prefix, -1) === '/') { $prefix = substr($prefix, 0, -1); }
+
+
+        $this->prefixes[] =  $prefix;
+        $callback($this);
+        array_pop($this->prefixes);
+    }
+
     public function add($pattern, $destination, $method = self::METHOD_ALL)
     {
         $route = new Route;
         $route->route_id = $this->idCounter++;
         $route->method = $method;
+
+        if (count($this->prefixes) > 0) {
+            $pattern_prefix = implode('/', $this->prefixes) . '/';
+            $pattern = $pattern_prefix . $pattern;
+        }
+
         $route->pattern = $this->prepareRouteString($pattern);
         $route->destination = $destination;
 
@@ -105,7 +128,6 @@ class Via
     }
 
     /**
-     * @param callable|null $handler
      * @return mixed|Match If no handler is given, returns a Match object. If a handler is given, it returns the result
      * of the call, after passing it the Match
      * @throws NoRequestStringSpecifiedException
@@ -218,6 +240,4 @@ class Via
         }
         return $string;
     }
-}    public function __construct() {
-        $this->setRouteMatchHandler([new DefaultMatchHandler(), 'handle']);
-    }
+}
