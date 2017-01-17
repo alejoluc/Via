@@ -1,7 +1,9 @@
 
 
-# Romma TO-DO
+# Via TO-DO
 
+- [ ] Decide whether to pass to dispatched callback the parameters only or to pass a Request object, like the
+      examples in this TODO
 - [ ] Make special characters work as parameter identifiers
 - [ ] Allow the passing of a Dependency Injection Container
 - [ ] Implement OR
@@ -18,9 +20,9 @@ parameter name when I define the route.
 
 ```php
 <?php
-$romma->setDIC($app); // Set is as a member?
+$router->setDIC($app); // Set is as a member?
 
-$romma->add('/api/users/git/{user}', function($request, $app){ // Pass it?
+$router->add('/api/users/git/{user}', function($request, $app){ // Pass it?
     $validator = $this->getDIC('app'); // Get it from member?
     $validator = $app('validator'); // Get it from function call?
 
@@ -34,7 +36,7 @@ $romma->add('/api/users/git/{user}', function($request, $app){ // Pass it?
 
 ```php
 <?php
-$romma->add('/api/users/get/{user}{.json|.xml:format}', function($request){
+$router->add('/api/users/get/{user}{.json|.xml:format}', function($request){
     $format = $request->param('format', 'json'); // json is the default
     $user = $request->param('user');
     $response = $DIContainer('response');
@@ -53,7 +55,7 @@ $routes = [
     '/api/users/get/{user}',
     '/api/users/getById/{user}'
 ];
-$romma->add($routes, function($request){
+$router->add($routes, function($request){
     $user = $request->param('user');
 });
 ?>
