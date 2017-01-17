@@ -35,7 +35,9 @@ class Router
         $route = new Route;
         $route->route_id = $this->idCounter++;
         $route->method = $method;
+        $route->destination = $destination;
 
+        // Check if the route has a prefix
         if (count($this->prefixes) > 0) {
             $pattern_prefix = implode('/', $this->prefixes);
             if (strpos($pattern, '/') !== 0) {
@@ -45,6 +47,9 @@ class Router
             $pattern = $pattern_prefix . $pattern;
         }
 
+        $route->pattern = $this->prepareRouteString($pattern);
+
+        // Assign group filters, if there are any
         if (count($this->prefixesFilters) > 0) {
             foreach ($this->prefixesFilters as $prefixFilters) {
                 foreach ($prefixFilters as $filter) {
@@ -54,9 +59,6 @@ class Router
                 }
             }
         }
-
-        $route->pattern = $this->prepareRouteString($pattern);
-        $route->destination = $destination;
 
         if ($route->isStatic()) {
             $route->is_dynamic = false;
