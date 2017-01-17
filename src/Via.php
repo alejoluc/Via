@@ -180,11 +180,11 @@ class Via
         foreach ($routeMatch->getFilters() as $filter) {
             $filterResult = false;
             if (is_callable($filter)) {
-                $filterResult = call_user_func($filter);
+                $filterResult = call_user_func_array($filter, $routeMatch->getParameters());
             } elseif (is_string($filter)) {
                 // Its a string, this means the filter is supposed to be registered in the Router
                 $filterCallback = $this->filters[$filter];
-                $filterResult = call_user_func($filterCallback);
+                $filterResult = call_user_func_array($filterCallback, $routeMatch->getParameters());
             }
             if ($filterResult !== true) {
                 $routeMatch->setFilterError($filterResult);
