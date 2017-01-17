@@ -182,7 +182,7 @@ class Via
             if (is_callable($filter)) {
                 $filterResult = call_user_func($filter);
             } elseif (is_string($filter)) {
-                // Its a string (check that!) so its supposed to be registered in the Router
+                // Its a string, this means the filter is supposed to be registered in the Router
                 $filterCallback = $this->filters[$filter];
                 $filterResult = call_user_func($filterCallback);
             }
