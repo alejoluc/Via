@@ -28,16 +28,7 @@ class Router
 
 
     private $prefixes = [];
-
-    public function group($prefix, $callback) {
-        if (substr($prefix, 0, 1) === '/') { $prefix = substr($prefix, 1); }
-        if (substr($prefix, -1) === '/') { $prefix = substr($prefix, 0, -1); }
-
-
-        $this->prefixes[] =  $prefix;
-        $callback($this);
-        array_pop($this->prefixes);
-    }
+    private $prefixesFilters = [];
 
     public function add($pattern, $destination, $method = self::METHOD_ALL)
     {
@@ -52,6 +43,16 @@ class Router
                 $pattern_prefix .= '/';
             }
             $pattern = $pattern_prefix . $pattern;
+        }
+
+        if (count($this->prefixesFilters) > 0) {
+            foreach ($this->prefixesFilters as $prefixFilters) {
+                foreach ($prefixFilters as $filter) {
+                    if (!in_array($filter, $route->filters, true)) {
+                        $route->filter($filter);
+                    }
+                }
+            }
         }
 
         $route->pattern = $this->prepareRouteString($pattern);
@@ -81,6 +82,18 @@ class Router
 
     public function delete($pattern, $destination) {
         return $this->add($pattern, $destination, 'DELETE');
+    }
+
+    public function group($prefix, $callback, $filters = array()) {
+        if (strpos($prefix, '/') === 0) { $prefix = substr($prefix, 1); }
+        if (substr($prefix, -1) === '/') { $prefix = substr($prefix, 0, -1); }
+
+
+        $this->prefixes[] =  $prefix;
+        $this->prefixesFilters[] = $filters;
+        $callback($this);
+        array_pop($this->prefixes);
+        array_pop($this->prefixesFilters);
     }
 
     public function registerFilter($name, callable $callback) {

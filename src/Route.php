@@ -25,6 +25,14 @@ class Route
         return $this;
     }
 
+    public function removeFilter($filter) {
+        $pos = array_search($filter, $this->filters, true);
+        if ($pos > -1) {
+            array_splice($this->filters, $pos, 1);
+        }
+        return $this;
+    }
+
     public function generateCaptureGroups($pattern)
     {
         $generatedRegex = preg_replace_callback('/\{:([A-z0-9-_.]+)\}/', [$this, 'replaceCustomConstraints'], $pattern);
