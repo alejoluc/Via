@@ -29,10 +29,6 @@ class Via
 
     private $prefixes = [];
 
-    public function __construct() {
-        $this->setRouteMatchHandler([new DefaultMatchHandler(), 'handle']);
-    }
-
     public function group($prefix, $callback) {
         if (substr($prefix, 0, 1) === '/') { $prefix = substr($prefix, 1); }
         if (substr($prefix, -1) === '/') { $prefix = substr($prefix, 0, -1); }
