@@ -203,6 +203,12 @@ class Router
                 $filterCallback = $this->filters[$filter];
                 $filterResult = call_user_func_array($filterCallback, $routeMatch->getParameters());
             }
+
+            if ($filterResult === null) {
+                throw new \InvalidArgumentException('Filter cannot return null, or not have a return statement. It must return an error
+                    or true|false');
+            }
+
             if ($filterResult !== true) {
                 $routeMatch->setFilterError($filterResult);
                 break;
