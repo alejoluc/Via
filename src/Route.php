@@ -22,6 +22,7 @@ class Route
 
     public function filter($filter) {
         $this->filters[] = $filter;
+        return $this;
     }
 
     public function generateCaptureGroups($pattern)
