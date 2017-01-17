@@ -44,7 +44,7 @@ class Route
         if (isset($this->constraints[$paramName])) {
             return '(' . $this->constraints[$paramName] . ')';
         } else {
-            return '(' . Router::FILTER_DEFAULT . ')';
+            return '(' . Router::ALLOW_DEFAULT . ')';
         }
     }
 

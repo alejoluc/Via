@@ -7,10 +7,10 @@ class Router
     const METHOD_ALL = 'VIA_ALL';
 
     // All letters, all numbers, underscore, hyphen, dot, comma, semicolon and colon. No spaces.
-    const FILTER_DEFAULT      = '[A-z0-9-_.,;:]+';
-    const FILTER_NUMERIC      = '\d+';
-    const FILTER_ONLYLETTERS  = '[A-z]+';
-    const FILTER_ALPHANUMERIC = '\w+'; // Includes the underscore character, but not the hyphen or the dot
+    const ALLOW_DEFAULT      = '[A-z0-9-_.,;:]+';
+    const ALLOW_NUMERIC      = '\d+';
+    const ALLOW_ONLYLETTERS  = '[A-z]+';
+    const ALLOW_ALPHANUMERIC = '\w+'; // Includes the underscore character, but not the hyphen or the dot
 
     private $routes         = [];
     private $routes_static  = [];
