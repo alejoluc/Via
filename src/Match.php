@@ -8,7 +8,7 @@ class Match {
 	private $result;
 	private $parameters;
 	private $filters;
-	private $filterError;
+	private $filterErrors;
 
 	public function __construct() {
 		$this->matchFound = false;
@@ -16,7 +16,7 @@ class Match {
 		$this->parameters = [];
 
 		$this->filters  	 = [];
-		$this->filterError   = null;
+		$this->filterErrors  = [];
 	}
 
 	public function setResult($result) {
@@ -58,15 +58,15 @@ class Match {
 	}
 
 	public function filtersPass() {
-		return $this->getFilterError() === null;
+		return count($this->getFilterErrors()) === 0;
 	}
 
-	public function getFilterError() {
-		return $this->filterError;
+	public function getFilterErrors() {
+		return $this->filterErrors;
 	}
 
-	public function setFilterError($errorResult) {
-		$this->filterError = $errorResult;
+	public function addFilterError($error) {
+		$this->filterErrors[] = $error;
 	}
 
 }
