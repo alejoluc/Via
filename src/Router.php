@@ -255,14 +255,16 @@ class Router
 
     private function sortRoutesByPatternLength()
     {
-        // Sort routes by length
-        // The longest ones should be compared to the request first
-        // Otherwise a shorter pattern that starts the same way *may* handle it (TODO: you sure?)
         usort($this->routes, function ($a, $b) {
             return strlen($a->pattern) < strlen($b->pattern);
         });
     }
 
+    /**
+     * Trim any leading or trailing white spaces, and ensure it starts and ends with a slash
+     * @param string $string
+     * @return string
+     */
     private function prepareRouteString($string)
     {
         $string = trim($string);
@@ -271,13 +273,18 @@ class Router
         return $string;
     }
 
+    /**
+     * Ensure a given string starts and ends with a slash
+     * @param string $string
+     * @return string
+     */
     private function ensurePreAndPostSlashes($string = '')
     {
         if ($string === '') {
             return '/';
         }
 
-        // If routes can contain UTF-8 characters, and they shouldn't, I should use mb_*
+        // TODO: If routes can contain UTF-8 characters, and they shouldn't, I should use mb_*
         if ($string[0] !== '/') {
             $string = "/{$string}";
         }
