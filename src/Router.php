@@ -33,6 +33,13 @@ class Router
     private $prefixes = [];
     private $prefixesFilters = [];
 
+    /**
+     * Add a route to the router
+     * @param string $pattern
+     * @param mixed $destination
+     * @param string $method
+     * @return Route
+     */
     public function add($pattern, $destination, $method = self::METHOD_ALL)
     {
         $route = new Route;
@@ -73,18 +80,42 @@ class Router
         return $route;
     }
 
+    /**
+     * Shorthand method to call add() with GET request method
+     * @param string $pattern
+     * @param mixed $destination
+     * @return Route
+     */
     public function get($pattern, $destination) {
         return $this->add($pattern, $destination, 'GET');
     }
 
+    /**
+     * Shorthand method to call add() with POST request method
+     * @param string $pattern
+     * @param mixed $destination
+     * @return Route
+     */
     public function post($pattern, $destination) {
         return $this->add($pattern, $destination, 'POST');
     }
 
+    /**
+     * Shorthand method to call add() with PUT request method
+     * @param string $pattern
+     * @param mixed $destination
+     * @return Route
+     */
     public function put($pattern, $destination) {
         return $this->add($pattern, $destination, 'PUT');
     }
 
+    /**
+     * Shorthand method to call add() with DELETE request method
+     * @param string $pattern
+     * @param mixed $destination
+     * @return Route
+     */
     public function delete($pattern, $destination) {
         return $this->add($pattern, $destination, 'DELETE');
     }
@@ -101,6 +132,12 @@ class Router
         array_pop($this->prefixesFilters);
     }
 
+    /**
+     * Register a filter in the router. The filter name can then be applied to routes by it's name
+     * @param $name
+     * @param callable $callback
+     * @return $this
+     */
     public function registerFilter($name, callable $callback) {
         $this->filters[$name] = $callback;
         return $this;
@@ -116,17 +153,30 @@ class Router
         return $this->routes;
     }
 
-
+    /**
+     * Get all registered routes
+     * @return array
+     */
     public function getRoutes()
     {
         return array_merge($this->routes_static, $this->routes);
     }
 
+    /**
+     * Set the request string. If this is not called, the Router will try to fall back to common server variables
+     * that usually contain the request string.
+     * @param $requestString
+     */
     public function setRequestString($requestString)
     {
         $this->requestString = $this->prepareRouteString($requestString);
     }
 
+    /**
+     * Set the request method. If this is not called, the Router will try to assign it the value of
+     * $_SERVER['REQUEST_METHOD'], and fall back to GET if it's not set
+     * @param $requestMethod
+     */
     public function setRequestMethod($requestMethod)
     {
         $this->requestMethod = strtoupper($requestMethod);
@@ -149,6 +199,7 @@ class Router
      * @return mixed|Match If no handler is given, returns a Match object. If a handler is given, it returns the result
      * of the call, after passing it the Match
      * @throws NoRequestStringSpecifiedException
+     * @throws \InvalidArgumentException
      */
     public function dispatch() {
 
@@ -156,20 +207,21 @@ class Router
         $this->resolveRequestMethod();
 
         $this->sortRoutesByPatternLength(); // This will sort the dynamic routes
-        $allRoutes = array_merge($this->routes_static, $this->routes);
+
+        // Flags to be used in the regex
         $flagsString = '';
-        if ($this->options['case_insensitive']) {
+        if ($this->options['pattern.caseInsensitive']) {
             $flagsString .= 'i';
         }
 
-        $parameterMatches = [];
-
         $routeMatch = new Match();
 
+        $allRoutes = array_merge($this->routes_static, $this->routes);
         /** @var Route $route */
         foreach  ($allRoutes as $route) {
             $route->pattern = $route->generateCaptureGroups($route->pattern);
             $pattern = "@^" . $route->pattern . "$@{$flagsString}";
+            $parameterMatches = [];
             if (preg_match($pattern, $this->requestString, $parameterMatches)) {
                 if ($route->method === $this::METHOD_ALL || $route->method === $this->requestMethod) {
                     array_shift($parameterMatches); // Drop the first item, it contains the whole match
@@ -208,8 +260,10 @@ class Router
             }
 
             if ($filterResult !== true) {
-                $routeMatch->setFilterError($filterResult);
-                break;
+                $routeMatch->addFilterError($filterResult);
+                if ($this->options['filters.stopOnFirstFail'] === true) {
+                    break;
+                }
             }
         }
 
