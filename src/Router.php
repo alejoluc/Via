@@ -151,8 +151,15 @@ class Router
      */
     public function dispatch() {
         if ($this->requestString === null) {
-            throw new NoRequestStringSpecifiedException();
+            if (isset($_SERVER['REQUEST_URI'])) {
+                $this->setRequestString($_SERVER['REQUEST_URI']);
+            } elseif (isset($_SERVER['PATH_INFO'])) {
+                $this->setRequestString($_SERVER['PATH_INFO']);
+            } else {
+                throw new NoRequestStringSpecifiedException();
+            }
         }
+
         if ($this->requestMethod === null) {
             $this->requestMethod = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : 'GET';
         }
