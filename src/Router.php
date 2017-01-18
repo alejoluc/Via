@@ -25,7 +25,8 @@ class Router
     private $filters = [];
 
     private $options = [
-        'case_insensitive' => true
+        'pattern.caseInsensitive' => true,
+        'filters.stopOnFirstFail' => true
     ];
 
 
