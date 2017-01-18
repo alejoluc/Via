@@ -150,19 +150,9 @@ class Router
      * @throws NoRequestStringSpecifiedException
      */
     public function dispatch() {
-        if ($this->requestString === null) {
-            if (isset($_SERVER['REQUEST_URI'])) {
-                $this->setRequestString($_SERVER['REQUEST_URI']);
-            } elseif (isset($_SERVER['PATH_INFO'])) {
-                $this->setRequestString($_SERVER['PATH_INFO']);
-            } else {
-                throw new NoRequestStringSpecifiedException();
-            }
-        }
 
-        if ($this->requestMethod === null) {
-            $this->requestMethod = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : 'GET';
-        }
+        $this->resolveRequestString();
+        $this->resolveRequestMethod();
 
         $this->sortRoutesByPatternLength(); // This will sort the dynamic routes
         $allRoutes = array_merge($this->routes_static, $this->routes);
@@ -226,6 +216,32 @@ class Router
             return call_user_func($this->getRouteMatchHandler(), $routeMatch);
         } else {
             return $routeMatch;
+        }
+    }
+
+    /**
+     * If no request string is manually specified, try to fall back to $_SERVER['REQUEST_URI'] or
+     * $_SERVER['PATH_INFO']
+     * @throws NoRequestStringSpecifiedException
+     */
+    private function resolveRequestString() {
+        if ($this->requestString === null) {
+            if (isset($_SERVER['REQUEST_URI'])) {
+                $this->setRequestString($_SERVER['REQUEST_URI']);
+            } elseif (isset($_SERVER['PATH_INFO'])) {
+                $this->setRequestString($_SERVER['PATH_INFO']);
+            } else {
+                throw new NoRequestStringSpecifiedException();
+            }
+        }
+    }
+
+    /**
+     * Defaults to GET
+     */
+    private function resolveRequestMethod() {
+        if ($this->requestMethod === null) {
+            $this->requestMethod = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : 'GET';
         }
     }
 
