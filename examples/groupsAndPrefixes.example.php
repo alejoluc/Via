@@ -19,8 +19,12 @@ $router = new alejoluc\Via\Router();
 
 $query = isset($_GET['query']) ? $_GET['query'] : '/';
 
-$router->setRequestMethod('GET');
 $router->setRequestString($query);
+
+$router->setRouteMatchHandler([new \alejoluc\Via\SampleMatchHandler, 'handle']);
+$router->setOptions([
+    'filters.stopOnFirstFail' => false
+]);
 
 
 $router->get('/', 'Hello World');
@@ -51,20 +55,6 @@ $router->group('/api/v0.2/', function($router){
 
 $router->get('/about', 'We are such and such');
 
-$match = $router->dispatch();
+$result = $router->dispatch();
 
-if (!$match->isMatch()) {
-    echo '<h1>404 NOT FOUND</h1>';
-} elseif (!$match->filtersPass()) {
-    echo 'Filter error: ' . $match->getFilterError() . '<br />';
-} else {
-    $result = $match->getResult();
-
-    if (is_string($result)) {
-        echo $result;
-    } elseif (is_callable($result)) {
-        echo call_user_func_array($result, $match->getParameters());
-    } else {
-        throw new Exception('Unhandled match type: ' . gettype($result));
-    }
-}
+echo $result;
