@@ -6,14 +6,16 @@ class Match {
 
 	private $matchFound;
 	private $result;
-	private $parameters;
 	private $filters;
 	private $filterErrors;
+
+    /** @var Request  */
+    private $request;
 
 	public function __construct() {
 		$this->matchFound = false;
 		$this->result  	  = null;
-		$this->parameters = [];
+        $this->request    = null;
 
 		$this->filters  	 = [];
 		$this->filterErrors  = [];
@@ -33,13 +35,13 @@ class Match {
 		return $this->result;
 	}
 
-	public function setParameters($parameters) {
-		$this->parameters = $parameters;
-	}
+	public function setRequest(Request $request) {
+	    $this->request = $request;
+    }
 
-	public function getParameters() {
-		return $this->parameters;
-	}
+    public function getRequest() {
+        return $this->request;
+    }
 
 	public function setMatchFound($matchFound) {
 		$this->matchFound = $matchFound;

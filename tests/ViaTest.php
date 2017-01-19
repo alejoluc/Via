@@ -138,7 +138,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestMethod('GET');
 
         $this->router->add('/users/{:username}/posts', ['UserController', 'listPosts'], 'GET');
-        $this->assertEquals('alejo', $this->router->dispatch()->getParameters()[0]);
+        $this->assertEquals('alejo', $this->router->dispatch()->getRequest()->getParameter('username'));
     }
 
     public function testFilterRegisteredInRouter() {

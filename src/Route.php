@@ -42,9 +42,9 @@ class Route
     public function replaceCustomConstraints($matches) {
         $paramName = $matches[1];
         if (isset($this->constraints[$paramName])) {
-            return '(' . $this->constraints[$paramName] . ')';
+            return "(?P<$paramName>" . $this->constraints[$paramName] . ')';
         } else {
-            return '(' . Router::ALLOW_DEFAULT . ')';
+            return "(?P<$paramName>" . Router::ALLOW_DEFAULT . ')';
         }
     }
 

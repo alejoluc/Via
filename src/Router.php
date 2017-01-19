@@ -203,32 +203,38 @@ class Router
      */
     public function dispatch() {
 
+        // Automatically set the request string and method if they were not manually set before
         $this->resolveRequestString();
         $this->resolveRequestMethod();
 
-        $this->sortRoutesByPatternLength(); // This will sort the dynamic routes
+        $this->sortDynamicRoutesByPatternLength();
 
         // Flags to be used in the regex
-        $flagsString = '';
+        $regexFlags = '';
         if ($this->options['pattern.caseInsensitive']) {
-            $flagsString .= 'i';
+            $regexFlags .= 'i';
         }
 
         $routeMatch = new Match();
+        $request    = new Request();
 
         $allRoutes = array_merge($this->routes_static, $this->routes);
         /** @var Route $route */
         foreach  ($allRoutes as $route) {
             $route->pattern = $route->generateCaptureGroups($route->pattern);
-            $pattern = "@^" . $route->pattern . "$@{$flagsString}";
+            $pattern = "@^" . $route->pattern . "$@{$regexFlags}";
             $parameterMatches = [];
             if (preg_match($pattern, $this->requestString, $parameterMatches)) {
                 if ($route->method === $this::METHOD_ALL || $route->method === $this->requestMethod) {
                     array_shift($parameterMatches); // Drop the first item, it contains the whole match
-                    $this->keepOnlyNumericKeys($parameterMatches);
+                    $this->keepOnlyNamedKeys($parameterMatches);
+
+                    $request->setParameters($parameterMatches);
+                    $request->setRequestString($this->requestString);
+                    $routeMatch->setRequest($request);
+
                     $routeMatch->setResult($route->destination);
                     $routeMatch->setMatchFound(true);
-                    $routeMatch->setParameters($parameterMatches);
                     $routeMatch->setFilters($route->filters);
                     break;
                 }
@@ -247,30 +253,33 @@ class Router
         foreach ($routeMatch->getFilters() as $filter) {
             $filterResult = false;
             if (is_callable($filter)) {
-                $filterResult = call_user_func_array($filter, $routeMatch->getParameters());
+                $filterResult = call_user_func($filter, $request);
             } elseif (is_string($filter)) {
                 // Its a string, this means the filter is supposed to be registered in the Router
                 $filterCallback = $this->filters[$filter];
-                $filterResult = call_user_func_array($filterCallback, $routeMatch->getParameters());
+                $filterResult   = call_user_func($filterCallback, $request);
             }
 
             if ($filterResult === null) {
-                throw new \InvalidArgumentException('Filter cannot return null, or not have a return statement. It must return an error
-                    or true|false');
+                throw new \InvalidArgumentException('Filter cannot return null, or not have a return statement');
             }
 
             if ($filterResult !== true) {
                 if (is_string($filterResult)) {
+                    // The filter returned only an error message
                     $filterFailure = new FilterFailure($filterResult);
                     $routeMatch->addFilterError($filterFailure);
                 } elseif (is_array($filterResult)) {
+                    // The filter may have returned more than just an error message
                     $filterErrorMessage = isset($filterResult['error_message']) ? $filterResult['error_message'] : null;
-                    $filterErrorCode    = isset($filterResult['error_code']) ? $filterResult['error_code'] : null;
+                    $filterErrorCode = isset($filterResult['error_code']) ? $filterResult['error_code'] : null;
                     $filterErrorPayload = isset($filterResult['payload']) ? $filterResult['payload'] : [];
 
                     $filterFailure = new FilterFailure($filterErrorMessage, $filterErrorCode, $filterErrorPayload);
                     $routeMatch->addFilterError($filterFailure);
-                } else {
+                } elseif ($filterResult instanceof FilterFailure) {
+                    $routeMatch->addFilterError($filterResult);
+                }else {
                     $routeMatch->addFilterError($filterResult);
                 }
 
@@ -280,6 +289,7 @@ class Router
             }
         }
 
+        // A match was found, all filters pass. Time to call the handler and pass along the match
         if (is_callable($this->getRouteMatchHandler())) {
             return call_user_func($this->getRouteMatchHandler(), $routeMatch);
         } else {
@@ -313,15 +323,15 @@ class Router
         }
     }
 
-    private function keepOnlyNumericKeys(&$matches) {
+    private function keepOnlyNamedKeys(&$matches) {
         array_walk($matches, function($val, $index) use (&$matches){
-            if (!is_int($index)) {
+            if (is_int($index)) {
                 unset($matches[$index]);
             }
         });
     }
 
-    private function sortRoutesByPatternLength()
+    private function sortDynamicRoutesByPatternLength()
     {
         usort($this->routes, function ($a, $b) {
             return strlen($a->pattern) < strlen($b->pattern);

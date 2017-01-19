@@ -31,8 +31,8 @@ class SampleMatchHandler {
                     controller and method names');
                 }
 
-                $controller = $result[0];
-                $method     = $result[1];
+                list ($controller, $method) = $result;
+
                 if (!class_exists($controller)) {
                     throw new \Exception('Class ' . $controller . ' could not be found');
                 }
@@ -41,9 +41,9 @@ class SampleMatchHandler {
                 }
 
                 $instance = new $controller();
-                return call_user_func_array([$instance, $method], $match->getParameters());
+                return call_user_func([$instance, $method], $match->getRequest());
             } elseif (is_callable($result)) {
-                return call_user_func_array($result, $match->getParameters());
+                return call_user_func($result, $match->getRequest());
             } else {
                 throw new \Exception('Unhandled match type: ' . gettype($result));
             }
