@@ -154,7 +154,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $match = $this->router->dispatch();
 
         $this->assertFalse($match->filtersPass());
-        $this->assertEquals('Filter fail message', $match->getFilterErrors()[0]);
+        $this->assertEquals('Filter fail message', $match->getFilterErrors()[0]->getErrorMessage());
     }
 
     public function testFilterCreatedInRoute() {
@@ -168,7 +168,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $match = $this->router->dispatch();
 
         $this->assertFalse($match->filtersPass());
-        $this->assertEquals('Filter fail message', $match->getFilterErrors()[0]);
+        $this->assertEquals('Filter fail message', $match->getFilterErrors()[0]->getErrorMessage());
     }
 
     /**

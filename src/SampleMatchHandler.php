@@ -12,7 +12,11 @@ class SampleMatchHandler {
             $ret = '<h1>Some filters reported an error:</h1>';
             $ret .= '<ul>';
             foreach ($errors as $error) {
-                $ret .= '<li>' . $error . '</li>';
+                if ($error instanceof FilterFailure) {
+                    $ret .= '<li>' . $error->getErrorMessage() . '</li>';
+                } else {
+                    $ret .= '<li>' . $error . '</li>';
+                }
             }
             $ret .= '</ul>';
             return $ret;

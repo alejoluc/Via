@@ -260,7 +260,20 @@ class Router
             }
 
             if ($filterResult !== true) {
-                $routeMatch->addFilterError($filterResult);
+                if (is_string($filterResult)) {
+                    $filterFailure = new FilterFailure($filterResult);
+                    $routeMatch->addFilterError($filterFailure);
+                } elseif (is_array($filterResult)) {
+                    $filterErrorMessage = isset($filterResult['error_message']) ? $filterResult['error_message'] : null;
+                    $filterErrorCode    = isset($filterResult['error_code']) ? $filterResult['error_code'] : null;
+                    $filterErrorPayload = isset($filterResult['payload']) ? $filterResult['payload'] : [];
+
+                    $filterFailure = new FilterFailure($filterErrorMessage, $filterErrorCode, $filterErrorPayload);
+                    $routeMatch->addFilterError($filterFailure);
+                } else {
+                    $routeMatch->addFilterError($filterResult);
+                }
+
                 if ($this->options['filters.stopOnFirstFail'] === true) {
                     break;
                 }
