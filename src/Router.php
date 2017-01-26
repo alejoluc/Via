@@ -321,6 +321,7 @@ class Router
      * @return string
      */
     private function stripFilenameAndQueryString($requestString) {
+        // Remove script file name, if present, from the Request String
         $fileName = $_SERVER['SCRIPT_NAME'];
         if (strpos($fileName, '/') === 0) { $fileName = substr($fileName, 1); }
         if (strpos($requestString, '/') === 0) { $requestString = substr($requestString, 1); }
@@ -331,6 +332,7 @@ class Router
             $requestString = substr($requestString, strlen($fileName));
         }
 
+        // End the Request String when ? or & fist appear
         $posQuestionMark = strpos($requestString, '?');
         $posAmpersand    = strpos($requestString, '&');
 
