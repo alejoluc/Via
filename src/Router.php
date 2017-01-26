@@ -323,8 +323,11 @@ class Router
     private function stripFilenameAndQueryString($requestString) {
         // Remove script file name, if present, from the Request String
         $fileName = $_SERVER['SCRIPT_NAME'];
-        if (strpos($fileName, '/') === 0) { $fileName = substr($fileName, 1); }
-        if (strpos($requestString, '/') === 0) { $requestString = substr($requestString, 1); }
+
+        // If SCRIPT_NAME and/or the Request String don't start with a slash, add it, for comparison
+        // purposes
+        if (strpos($fileName, '/') !== 0) { $fileName = "/$fileName"; }
+        if (strpos($requestString, '/') !== 0) { $requestString = "/$requestString"; }
 
         $posFileNameInRequest = strpos($requestString, $fileName) === 0;
 
