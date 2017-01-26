@@ -305,13 +305,47 @@ class Router
     private function resolveRequestString() {
         if ($this->requestString === null) {
             if (isset($_SERVER['REQUEST_URI'])) {
-                $this->setRequestString($_SERVER['REQUEST_URI']);
+                $this->setRequestString($this->stripFilenameAndQueryString($_SERVER['REQUEST_URI']));
             } elseif (isset($_SERVER['PATH_INFO'])) {
-                $this->setRequestString($_SERVER['PATH_INFO']);
+                $this->setRequestString($this->stripFilenameAndQueryString($_SERVER['PATH_INFO']));
             } else {
                 throw new NoRequestStringSpecifiedException();
             }
         }
+    }
+
+    /**
+     * If the request string starts with the script file name, remove it from the beginning.
+     * If the request string contains ?, &, or both, en the request string in their first occurrence
+     * @param $requestString
+     * @return string
+     */
+    private function stripFilenameAndQueryString($requestString) {
+        $fileName = $_SERVER['SCRIPT_NAME'];
+        if (strpos($fileName, '/') === 0) { $fileName = substr($fileName, 1); }
+        if (strpos($requestString, '/') === 0) { $requestString = substr($requestString, 1); }
+
+        $posFileNameInRequest = strpos($requestString, $fileName) === 0;
+
+        if ($posFileNameInRequest !== false) {
+            $requestString = substr($requestString, strlen($fileName));
+        }
+
+        $posQuestionMark = strpos($requestString, '?');
+        $posAmpersand    = strpos($requestString, '&');
+
+        if ($posQuestionMark !== false && $posAmpersand !== false) {
+            $posFirst = min($posQuestionMark, $posAmpersand);
+            $requestString = substr($requestString, 0, $posFirst);
+        } elseif ($posQuestionMark !== false) {
+            $pos = $posQuestionMark;
+            $requestString = substr($requestString, 0, $pos);
+        } elseif ($posAmpersand !== false) {
+            $pos = $posAmpersand;
+            $requestString = substr($requestString, 0, $pos);
+        }
+
+        return $requestString;
     }
 
     /**
