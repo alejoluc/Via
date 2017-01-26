@@ -316,7 +316,7 @@ class Router
 
     /**
      * If the request string starts with the script file name, remove it from the beginning.
-     * If the request string contains ?, &, or both, en the request string in their first occurrence
+     * If the request string contains ?, &, or both, end the request string in their first occurrence
      * @param $requestString
      * @return string
      */
