@@ -10,7 +10,7 @@ $query = isset($_GET['query']) ? $_GET['query'] : '/';
 
 $router->setRequestString($query);
 
-$router->setMatchHandler([new \alejoluc\Via\SampleMatchHandler, 'handle']);
+$router->setMatchHandler([new \alejoluc\Via\SampleHandlers\SampleFullMatchHandler, 'handle']);
 $router->setOptions([
     'filters.stopOnFirstFail' => false
 ]);
