@@ -9,6 +9,7 @@
 namespace alejoluc\Via\SampleHandlers;
 
 use alejoluc\Via\Match;
+use alejoluc\Via\FilterFailure;
 
 class SampleFullMatchHandler {
 
