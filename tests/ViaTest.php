@@ -48,7 +48,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->get('/unused/route', 'Generic endpoint');
 
         $match = $this->router->dispatch();
-        $result = $match->getResult();
+        $result = $match->getDestination();
     }
 
     public function testOnRouteFoundReturnsMatchObject() {
@@ -67,10 +67,10 @@ class ViaTest extends PHPUnit_Framework_TestCase
 
         $this->router->add('home', 'HomePage', 'GET');
         $this->router->add('home', 'HomePagePost', 'POST');
-        $this->assertEquals('HomePagePost', $this->router->dispatch()->getResult());
+        $this->assertEquals('HomePagePost', $this->router->dispatch()->getDestination());
 
         $this->router->setRequestMethod('GET');
-        $this->assertEquals('HomePage', $this->router->dispatch()->getResult());
+        $this->assertEquals('HomePage', $this->router->dispatch()->getDestination());
     }
 
     public function testCorrectRouteIsDispatched()
@@ -81,10 +81,10 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->add('users/{:user}/', 'UserMainPage', 'GET');
         $this->router->add('users/{:user}/posts', 'UserPostsPage', 'GET');
         $this->router->add('users/list/', 'UsersListPage', 'GET');
-        $this->assertEquals('UsersListPage', $this->router->dispatch()->getResult());
+        $this->assertEquals('UsersListPage', $this->router->dispatch()->getDestination());
 
         $this->router->setRequestString('users/alejo/');
-        $this->assertEquals('UserMainPage', $this->router->dispatch()->getResult());
+        $this->assertEquals('UserMainPage', $this->router->dispatch()->getDestination());
     }
 
     public function testCustomConstraintsSatisfied()
@@ -95,7 +95,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $withConstraints = $this->router->add('users/{:user}/posts/{:month}', 'UserPostsPageByMonth', 'GET');
         $withConstraints->where('month', '[0-9]{1,2}');
 
-        $this->assertEquals('UserPostsPageByMonth', $this->router->dispatch()->getResult());
+        $this->assertEquals('UserPostsPageByMonth', $this->router->dispatch()->getDestination());
     }
 
     public function testCustomConstraintsNotSatisfiedReturnFalseOnFound()
@@ -117,7 +117,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
 
         $this->router->add('users/{:user}', ['UsersController', 'showUserPage']);
         
-        $this->assertEquals(['UsersController', 'showUserPage'], $this->router->dispatch()->getResult());
+        $this->assertEquals(['UsersController', 'showUserPage'], $this->router->dispatch()->getDestination());
     }
 
     public function testFluentInterface()
@@ -130,7 +130,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
                      ->where('user', '\w+')
                      ->where('post_id', '\d+');
         
-        $this->assertEquals($destination, $this->router->dispatch()->getResult());
+        $this->assertEquals($destination, $this->router->dispatch()->getDestination());
     }
 
     public function testReturnsParameters() {
@@ -183,7 +183,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         });
 
         $match = $this->router->dispatch();
-        $result = $match->getResult();
+        $result = $match->getDestination();
     }
 
 }

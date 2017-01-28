@@ -10,7 +10,7 @@ $query = isset($_GET['query']) ? $_GET['query'] : '/';
 
 $router->setRequestString($query);
 
-$router->setRouteMatchHandler([new \alejoluc\Via\SampleMatchHandler, 'handle']);
+$router->setMatchHandler([new \alejoluc\Via\SampleMatchHandler, 'handle']);
 
 // Targeting a class and method by using an array in the destination
 $router->get('/', ['ExampleController', 'home']);

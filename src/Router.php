@@ -21,6 +21,10 @@ class Router
 
     /** @var callable $routeMatchHandler */
     private $routeMatchHandler;
+    /** @var  callable $filtersErrorHandler */
+    private $filtersErrorHandler = null;
+    /** @var  callable $noMatchHandler */
+    private $noMatchFoundHandler = null;
 
     private $filters = [];
 
@@ -187,12 +191,16 @@ class Router
         $this->options = array_merge($this->options, $options);
     }
 
-    public function setRouteMatchHandler(callable $handler) {
+    public function setMatchHandler(callable $handler) {
         $this->routeMatchHandler = $handler;
     }
 
-    public function getRouteMatchHandler() {
-        return $this->routeMatchHandler;
+    public function onFiltersError(callable $handler) {
+        $this->filtersErrorHandler = $handler;
+    }
+
+    public function onNoMatchFound(callable $handler) {
+        $this->noMatchFoundHandler = $handler;
     }
 
     /**
@@ -233,7 +241,7 @@ class Router
                     $request->setRequestString($this->requestString);
                     $routeMatch->setRequest($request);
 
-                    $routeMatch->setResult($route->destination);
+                    $routeMatch->setDestination($route->destination);
                     $routeMatch->setMatchFound(true);
                     $routeMatch->setFilters($route->filters);
                     break;
@@ -242,14 +250,20 @@ class Router
         }
 
         if (!$routeMatch->isMatch()) { // No match, we can return early
-            if (is_callable($this->getRouteMatchHandler())) {
-                return call_user_func($this->getRouteMatchHandler(), $routeMatch);
+            if (is_callable($this->noMatchFoundHandler)) {
+                // If onNoMatchFound() was setup, call it, and pass it the request string
+                return call_user_func($this->noMatchFoundHandler, $this->requestString);
+            } elseif (is_callable($this->routeMatchHandler)) {
+                // If not, fallback to the match handler, and pass it the Match object
+                return call_user_func($this->routeMatchHandler, $routeMatch);
             } else {
+                // If a match handler has not been set, return the Match object
                 return $routeMatch;
             }
         }
 
         // There is a match, lets see if the filters pass
+        $filterError = false;
         foreach ($routeMatch->getFilters() as $filter) {
             $filterResult = false;
             if (is_callable($filter)) {
@@ -265,6 +279,7 @@ class Router
             }
 
             if ($filterResult !== true) {
+                $filterError = true;
                 if (is_string($filterResult)) {
                     // The filter returned only an error message
                     $filterFailure = new FilterFailure($filterResult);
@@ -272,7 +287,7 @@ class Router
                 } elseif (is_array($filterResult)) {
                     // The filter may have returned more than just an error message
                     $filterErrorMessage = isset($filterResult['error_message']) ? $filterResult['error_message'] : null;
-                    $filterErrorCode = isset($filterResult['error_code']) ? $filterResult['error_code'] : null;
+                    $filterErrorCode    = isset($filterResult['error_code']) ? $filterResult['error_code'] : null;
                     $filterErrorPayload = isset($filterResult['payload']) ? $filterResult['payload'] : [];
 
                     $filterFailure = new FilterFailure($filterErrorMessage, $filterErrorCode, $filterErrorPayload);
@@ -289,10 +304,24 @@ class Router
             }
         }
 
+        if ($filterError === true) { // At least one filter failed, call the appropriate handler
+            if (is_callable($this->filtersErrorHandler)) {
+                // If onFiltersError() was set up, call it, and pass it only the errors
+                return call_user_func($this->filtersErrorHandler, $routeMatch->getFilterErrors());
+            } elseif (is_callable($this->routeMatchHandler)) {
+                // Otherwise, fall back to the match handler, and pass it the Match object
+                return call_user_func($this->routeMatchHandler, $routeMatch);
+            } else {
+                // If no match handler was set up, return the Match object
+                return $routeMatch;
+            }
+        }
+
         // A match was found, all filters pass. Time to call the handler and pass along the match
-        if (is_callable($this->getRouteMatchHandler())) {
-            return call_user_func($this->getRouteMatchHandler(), $routeMatch);
+        if (is_callable($this->routeMatchHandler)) {
+            return call_user_func($this->routeMatchHandler, $routeMatch);
         } else {
+            // If no match handler was set up, return the Match object
             return $routeMatch;
         }
     }

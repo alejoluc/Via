@@ -5,7 +5,7 @@ namespace alejoluc\Via;
 class Match {
 
 	private $matchFound;
-	private $result;
+	private $destination;
 	private $filters;
 	private $filterErrors;
 
@@ -13,26 +13,26 @@ class Match {
     private $request;
 
 	public function __construct() {
-		$this->matchFound = false;
-		$this->result  	  = null;
-        $this->request    = null;
+		$this->matchFound  = false;
+		$this->destination = null;
+        $this->request     = null;
 
 		$this->filters  	 = [];
 		$this->filterErrors  = [];
 	}
 
-	public function setResult($result) {
-		$this->result = $result;
+	public function setDestination($destination) {
+		$this->destination = $destination;
 	}
 
-	public function getResult() {
+	public function getDestination() {
 		if (!$this->isMatch()) {
 			throw new ViaException('Can\'t retrieve result for inexistent match');
 		}
 		if (!$this->filtersPass()) {
 			throw new ViaException('Can\'t access routing result when a filter fails');
 		}
-		return $this->result;
+		return $this->destination;
 	}
 
 	public function setRequest(Request $request) {

@@ -1,8 +1,16 @@
 <?php
 
-namespace alejoluc\Via;
+/**
+ * This is an example Match Handler that will do three jobs: check if a match was found -and if not, show
+ * a simple 404 message-, check if all the filters pass -and if not, show their errors-, and finally, if all
+ * is well, return a proper result according of the Match destination.
+ */
 
-class SampleMatchHandler {
+namespace alejoluc\Via\SampleHandlers;
+
+use alejoluc\Via\Match;
+
+class SampleFullMatchHandler {
 
     public function handle(Match $match) {
         if (!$match->isMatch()) {
@@ -21,17 +29,17 @@ class SampleMatchHandler {
             $ret .= '</ul>';
             return $ret;
         } else {
-            $result = $match->getResult();
+            $destination = $match->getDestination();
 
-            if (is_string($result)) {
-                return $result;
-            } elseif (is_array($result)) {
-                if (count($result) < 2) {
+            if (is_string($destination)) {
+                return $destination;
+            } elseif (is_array($destination)) {
+                if (count($destination) < 2) {
                     throw new \InvalidArgumentException('Route must return an array of at least two elements:
                     controller and method names');
                 }
 
-                list ($controller, $method) = $result;
+                list ($controller, $method) = $destination;
 
                 if (!class_exists($controller)) {
                     throw new \Exception('Class ' . $controller . ' could not be found');
@@ -42,10 +50,10 @@ class SampleMatchHandler {
 
                 $instance = new $controller();
                 return call_user_func([$instance, $method], $match->getRequest());
-            } elseif (is_callable($result)) {
-                return call_user_func($result, $match->getRequest());
+            } elseif (is_callable($destination)) {
+                return call_user_func($destination, $match->getRequest());
             } else {
-                throw new \Exception('Unhandled match type: ' . gettype($result));
+                throw new \Exception('Unhandled match type: ' . gettype($destination));
             }
         }
     }
