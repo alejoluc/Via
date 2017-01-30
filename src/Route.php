@@ -48,9 +48,9 @@ class Route
         }
     }
 
-    public function isStatic()
+    public function hasParameters()
     {
         // benchmarks against strpos() showed preg_match was consistently faster across php versions
-        return preg_match('/\{/', $this->pattern) !== 1;
+        return preg_match('/\{/', $this->pattern) === 1;
     }
 }

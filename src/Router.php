@@ -74,12 +74,12 @@ class Router
             }
         }
 
-        if ($route->isStatic()) {
-            $route->is_dynamic = false;
-            $this->routes_static[] = $route;
-        } else {
+        if ($route->hasParameters()) {
             $route->is_dynamic = true;
             $this->routes[] = $route;
+        } else {
+            $route->is_dynamic = false;
+            $this->routes_static[] = $route;
         }
         return $route;
     }
