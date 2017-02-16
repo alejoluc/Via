@@ -350,16 +350,13 @@ class Router
      * @return string
      */
     private function stripFilenameAndQueryString($requestString) {
-        // Remove script file name, if present, from the Request String
         $fileName = $_SERVER['SCRIPT_NAME'];
-
         // If SCRIPT_NAME and/or the Request String don't start with a slash, add it, for comparison
         // purposes
         if (strpos($fileName, '/') !== 0) { $fileName = "/$fileName"; }
         if (strpos($requestString, '/') !== 0) { $requestString = "/$requestString"; }
-
+        // Check if the file name is the first thing in the request string, and remove it if true
         $posFileNameInRequest = strpos($requestString, $fileName) === 0;
-
         if ($posFileNameInRequest !== false) {
             $requestString = substr($requestString, strlen($fileName));
         }
@@ -367,7 +364,6 @@ class Router
         // End the Request String when ? or & fist appear
         $posQuestionMark = strpos($requestString, '?');
         $posAmpersand    = strpos($requestString, '&');
-
         if ($posQuestionMark !== false && $posAmpersand !== false) {
             $posFirst = min($posQuestionMark, $posAmpersand);
             $requestString = substr($requestString, 0, $posFirst);
@@ -378,7 +374,6 @@ class Router
             $pos = $posAmpersand;
             $requestString = substr($requestString, 0, $pos);
         }
-
         return $requestString;
     }
 
