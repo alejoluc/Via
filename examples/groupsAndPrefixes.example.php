@@ -41,6 +41,12 @@ $router->group('/api/', function($router){
     $router->get('listAll', 'Viewing all users');
 });
 
+// You can use the "use" construct too, instead of passing it as an argument. This is helpful if you want
+// to keep code completion suggestions in your IDE inside the group callback.
+$router->group('messages', function() use ($router){
+    $router->get('view', 'Viewing messages');
+});
+
 $router->group('/api/v0.1/', function($router){
     $router->get('createUser', 'Creating user');
 });
