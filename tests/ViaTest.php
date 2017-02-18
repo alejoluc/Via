@@ -186,4 +186,24 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $result = $match->getDestination();
     }
 
+    /**
+     * @expectedException  \InvalidArgumentException
+     */
+    public function testNamedRouteNotFoundThrowsException() {
+        $this->router->getPath('no.such.route');
+    }
+
+
+    public function testNamedRouteBuildsCorrectLink() {
+        $this->router->get('/users/list', 'List Users', 'users.list');
+        $link = $this->router->getPath('users.list');
+        $this->assertEquals('/users/list/', $link);
+    }
+
+    public function testNamedRouteBuildsCorrectLinkWithParameters() {
+        $this->router->get('/users/{:name}', 'List Users', 'users.list');
+        $link = $this->router->getPath('users.list', ['name' => 'alejo']);
+        $this->assertEquals('/users/alejo/', $link);
+    }
+
 }

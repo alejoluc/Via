@@ -16,6 +16,8 @@ class Router
     private $routes_static  = [];
     private $idCounter      = 0;
 
+    private $namedRoutes    = [];
+
     private $requestString;
     private $requestMethod;
 
@@ -39,17 +41,22 @@ class Router
 
     /**
      * Add a route to the router
-     * @param string $pattern
-     * @param mixed $destination
-     * @param string $method
+     * @param string      $pattern
+     * @param mixed       $destination
+     * @param string      $method
+     * @param string|null $name  Give a name for the route, usually to be used with the getPath() method afterwards
      * @return Route
      */
-    public function add($pattern, $destination, $method = self::METHOD_ALL)
+    public function add($pattern, $destination, $method = self::METHOD_ALL, $name = null)
     {
         $route = new Route;
         $route->route_id = $this->idCounter++;
         $route->method = $method;
         $route->destination = $destination;
+
+        if ($name!== null && is_string($name)) {
+            $this->namedRoutes[$name] = $route;
+        }
 
         // Check if the route has a prefix
         if (count($this->prefixes) > 0) {
@@ -90,8 +97,8 @@ class Router
      * @param mixed $destination
      * @return Route
      */
-    public function get($pattern, $destination) {
-        return $this->add($pattern, $destination, 'GET');
+    public function get($pattern, $destination, $name = null) {
+        return $this->add($pattern, $destination, 'GET', $name);
     }
 
     /**
@@ -100,8 +107,8 @@ class Router
      * @param mixed $destination
      * @return Route
      */
-    public function post($pattern, $destination) {
-        return $this->add($pattern, $destination, 'POST');
+    public function post($pattern, $destination, $name = null) {
+        return $this->add($pattern, $destination, 'POST', $name);
     }
 
     /**
@@ -110,8 +117,8 @@ class Router
      * @param mixed $destination
      * @return Route
      */
-    public function put($pattern, $destination) {
-        return $this->add($pattern, $destination, 'PUT');
+    public function put($pattern, $destination, $name = null) {
+        return $this->add($pattern, $destination, 'PUT', $name);
     }
 
     /**
@@ -120,8 +127,8 @@ class Router
      * @param mixed $destination
      * @return Route
      */
-    public function delete($pattern, $destination) {
-        return $this->add($pattern, $destination, 'DELETE');
+    public function delete($pattern, $destination, $name = null) {
+        return $this->add($pattern, $destination, 'DELETE', $name);
     }
 
     public function group($prefix, $callback, $filters = array()) {
@@ -134,6 +141,28 @@ class Router
         $callback($this);
         array_pop($this->prefixes);
         array_pop($this->prefixesFilters);
+    }
+
+    /**
+     * Get the path (link) to a named route with the given parameters, if any
+     * @param string $routeName
+     * @param array $parameters
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    public function getPath($routeName, $parameters = []) {
+        if (!array_key_exists($routeName, $this->namedRoutes)) {
+            throw new \InvalidArgumentException('No route named "' . $routeName . '" found');
+        }
+
+        $route      = $this->namedRoutes[$routeName];
+        $route_path = $route->pattern;
+
+        foreach ($parameters as $paramName => $paramValue) {
+            $route_path = str_replace("{:$paramName}", $paramValue, $route_path);
+        }
+
+        return $route_path;
     }
 
     /**
