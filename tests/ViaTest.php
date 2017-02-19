@@ -206,4 +206,14 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('/users/alejo/', $link);
     }
 
+    public function testNamedRouteBuildsCorrectLinkInsideGroup() {
+        $this->router->group('some/', function(){
+            $this->router->group('prefix/', function(){
+                $this->router->get('endpoint/{:action}', 'Endpoint', 'app.endpoint');
+            });
+        });
+        $link = $this->router->getPath('app.endpoint', ['action' => 'check']);
+        $this->assertEquals('/some/prefix/endpoint/check/', $link);
+    }
+
 }
