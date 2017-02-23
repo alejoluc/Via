@@ -4,7 +4,7 @@ namespace alejoluc\Via;
 
 class Router
 {
-    const METHOD_ALL = 'VIA_ALL';
+    const METHOD_ALL = 'ALL_METHODS';
 
     // All letters, all numbers, underscore, hyphen, dot, comma, semicolon and colon. No spaces.
     const ALLOW_DEFAULT      = '[A-z0-9-_.,;:]+';
