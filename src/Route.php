@@ -35,7 +35,7 @@ class Route
 
     public function generateCaptureGroups($pattern)
     {
-        $generatedRegex = preg_replace_callback('/\{:([A-z0-9-_.]+)\}/', [$this, 'replaceCustomConstraints'], $pattern);
+        $generatedRegex = preg_replace_callback('/\{([A-z0-9-_.]+)\}/', [$this, 'replaceCustomConstraints'], $pattern);
         return $generatedRegex;
     }
 

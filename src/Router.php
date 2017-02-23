@@ -159,7 +159,7 @@ class Router
         $route_path = $route->pattern;
 
         foreach ($parameters as $paramName => $paramValue) {
-            $route_path = str_replace("{:$paramName}", $paramValue, $route_path);
+            $route_path = str_replace('{' . $paramName . '}', $paramValue, $route_path);
         }
 
         return $route_path;

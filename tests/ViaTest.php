@@ -78,8 +78,8 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestString('/users/list');
         $this->router->setRequestMethod('GET');
 
-        $this->router->add('users/{:user}/', 'UserMainPage', 'GET');
-        $this->router->add('users/{:user}/posts', 'UserPostsPage', 'GET');
+        $this->router->add('users/{user}/', 'UserMainPage', 'GET');
+        $this->router->add('users/{user}/posts', 'UserPostsPage', 'GET');
         $this->router->add('users/list/', 'UsersListPage', 'GET');
         $this->assertEquals('UsersListPage', $this->router->dispatch()->getDestination());
 
@@ -92,7 +92,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestString('/users/alejo/posts/12');
         $this->router->setRequestMethod('GET');
 
-        $withConstraints = $this->router->add('users/{:user}/posts/{:month}', 'UserPostsPageByMonth', 'GET');
+        $withConstraints = $this->router->add('users/{user}/posts/{month}', 'UserPostsPageByMonth', 'GET');
         $withConstraints->where('month', '[0-9]{1,2}');
 
         $this->assertEquals('UserPostsPageByMonth', $this->router->dispatch()->getDestination());
@@ -103,7 +103,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestString('/users/alejo/posts/123');
         $this->router->setRequestMethod('GET');
 
-        $withConstraints = $this->router->add('users/{:user}/posts/{:month}', 'UserPostsPageByMonth', 'GET');
+        $withConstraints = $this->router->add('users/{user}/posts/{month}', 'UserPostsPageByMonth', 'GET');
         $withConstraints->where('month', '[0-9]{1,2}');
 
         $result = $this->router->dispatch();
@@ -115,7 +115,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestString('/users/alejo');
         $this->router->setRequestMethod('GET');
 
-        $this->router->add('users/{:user}', ['UsersController', 'showUserPage']);
+        $this->router->add('users/{user}', ['UsersController', 'showUserPage']);
         
         $this->assertEquals(['UsersController', 'showUserPage'], $this->router->dispatch()->getDestination());
     }
@@ -126,7 +126,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestMethod('GET');
 
         $destination = ['UserController', 'UserPostView'];
-        $this->router->add('users/{:user}/posts/{:post_id}', $destination)
+        $this->router->add('users/{user}/posts/{post_id}', $destination)
                      ->where('user', '\w+')
                      ->where('post_id', '\d+');
         
@@ -137,7 +137,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestString('/users/alejo/posts');
         $this->router->setRequestMethod('GET');
 
-        $this->router->add('/users/{:username}/posts', ['UserController', 'listPosts'], 'GET');
+        $this->router->add('/users/{username}/posts', ['UserController', 'listPosts'], 'GET');
         $this->assertEquals('alejo', $this->router->dispatch()->getRequest()->getParameter('username'));
     }
 
@@ -145,7 +145,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestString('/users/alejo/posts');
         $this->router->setRequestMethod('GET');
 
-        $this->router->get('/users/{:user}/posts', 'Generic route endpoint')->filter('testFilter');
+        $this->router->get('/users/{user}/posts', 'Generic route endpoint')->filter('testFilter');
 
         $this->router->registerFilter('testFilter', function(){
             return 'Filter fail message';
@@ -161,7 +161,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestString('/users/alejo/posts');
         $this->router->setRequestMethod('GET');
 
-        $this->router->get('/users/{:user}/posts', 'Generic route endpoint')->filter(function(){
+        $this->router->get('/users/{user}/posts', 'Generic route endpoint')->filter(function(){
             return 'Filter fail message';
         });
 
@@ -178,7 +178,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->setRequestString('/users/alejo/posts');
         $this->router->setRequestMethod('GET');
 
-        $this->router->get('/users/{:user}/posts', 'Generic route endpoint')->filter(function(){
+        $this->router->get('/users/{user}/posts', 'Generic route endpoint')->filter(function(){
             return 'Filter fail message';
         });
 
@@ -201,7 +201,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
     }
 
     public function testNamedRouteBuildsCorrectLinkWithParameters() {
-        $this->router->get('/users/{:name}', 'List Users', 'users.list');
+        $this->router->get('/users/{name}', 'List Users', 'users.list');
         $link = $this->router->getPath('users.list', ['name' => 'alejo']);
         $this->assertEquals('/users/alejo/', $link);
     }
@@ -209,7 +209,7 @@ class ViaTest extends PHPUnit_Framework_TestCase
     public function testNamedRouteBuildsCorrectLinkInsideGroup() {
         $this->router->group('some/', function(){
             $this->router->group('prefix/', function(){
-                $this->router->get('endpoint/{:action}', 'Endpoint', 'app.endpoint');
+                $this->router->get('endpoint/{action}', 'Endpoint', 'app.endpoint');
             });
         });
         $link = $this->router->getPath('app.endpoint', ['action' => 'check']);

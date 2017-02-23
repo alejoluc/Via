@@ -6,11 +6,11 @@
  * /
  * /api/
  * /api/users/
- * /api/users/{:user}/
+ * /api/users/{user}/
  * /api/listall/
  * /api/v0.1/createuser/
  * /about/
- * /api/v0.2/actions/create/user/{:user}/
+ * /api/v0.2/actions/create/user/{user}/
  */
 
 require dirname(__DIR__) . '/vendor/autoload.php';
@@ -33,7 +33,7 @@ $router->group('/api/', function($router){
     $router->get('/', 'Api Default Page');  // The slash in the pattern is optional, can be blank string
     $router->group('/users/', function($router){
         $router->get('', 'Users List');
-        $router->get('{:user}', function($user){
+        $router->get('{user}', function($user){
             echo 'Viewing ' . $user;
         });
     });
@@ -53,7 +53,7 @@ $router->group('/api/v0.1/', function($router){
 
 $router->group('/api/v0.2/', function($router){
     $router->group('/actions/create', function($router){
-        $router->get('/user/{:user}/', function($user){
+        $router->get('/user/{user}/', function($user){
             return 'Creating user ' . $user . ' with api v0.2';
         });
     });
