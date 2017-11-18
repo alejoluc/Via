@@ -247,7 +247,7 @@ class Router
         $this->sortDynamicRoutesByPatternLength();
 
         // Flags to be used in the regex
-        $regexFlags = '';
+        $regexFlags = 'U';
         if ($this->options['pattern.caseInsensitive']) {
             $regexFlags .= 'i';
         }

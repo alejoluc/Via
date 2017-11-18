@@ -1,6 +1,8 @@
 <?php
 
-class ViaTest extends PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class ViaTest extends TestCase
 {
 
     /** @var $router alejoluc\Via\Router */
@@ -118,6 +120,27 @@ class ViaTest extends PHPUnit_Framework_TestCase
         $this->router->add('users/{user}', ['UsersController', 'showUserPage']);
         
         $this->assertEquals(['UsersController', 'showUserPage'], $this->router->dispatch()->getDestination());
+    }
+
+    public function testSlug() {
+        $this->router->setRequestString('/posts/20594-this-is-a-slug');
+        $this->router->setRequestMethod('GET');
+
+        $this->router->add('/posts/{number}-{slug}', 'ShowPost');
+        $request = $this->router->dispatch()->getRequest();
+        $parameters = $request->getParameters();
+        
+        $this->assertEquals(['number' => '20594', 'slug' => 'this-is-a-slug'], $parameters);
+    }
+
+    public function testSlug2() {
+        $this->router->setRequestString('/posts/20594-this-is-a-slug');
+        $this->router->setRequestMethod('GET');
+
+        $this->router->add('/posts/{number}-{prefix}-{slug}', 'ShowPost');
+        $request = $this->router->dispatch()->getRequest();
+        $parameters = $request->getParameters();
+        $this->assertEquals(['number' => '20594', 'prefix' => 'this', 'slug' => 'is-a-slug'], $parameters);
     }
 
     public function testFluentInterface()
