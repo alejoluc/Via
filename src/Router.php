@@ -32,6 +32,7 @@ class Router
 
     private $options = [
         'pattern.caseInsensitive' => true,
+        'pattern.ungreedyRegex'   => true,
         'filters.stopOnFirstFail' => true
     ];
 
@@ -247,9 +248,12 @@ class Router
         $this->sortDynamicRoutesByPatternLength();
 
         // Flags to be used in the regex
-        $regexFlags = 'U';
+        $regexFlags = '';
         if ($this->options['pattern.caseInsensitive']) {
             $regexFlags .= 'i';
+        }
+        if ($this->options['pattern.ungreedyRegex']) {
+        	$regexFlags .= 'U';
         }
 
         $routeMatch = new Match();
