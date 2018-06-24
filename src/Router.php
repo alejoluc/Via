@@ -262,8 +262,8 @@ class Router
         $allRoutes = array_merge($this->routes_static, $this->routes);
         /** @var Route $route */
         foreach  ($allRoutes as $route) {
-            $route->pattern = $route->generateCaptureGroups($route->pattern);
-            $pattern = "@^" . $route->pattern . "$@{$regexFlags}";
+            $pattern = $route->generateCaptureGroups($route->pattern);
+            $pattern = "@^" . $pattern . "$@{$regexFlags}";
             $parameterMatches = [];
             if (preg_match($pattern, $this->requestString, $parameterMatches)) {
                 if ($route->method === $this::METHOD_ALL || $route->method === $this->requestMethod) {
