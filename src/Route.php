@@ -21,13 +21,17 @@ class Route
     }
 
     public function filter($filter) {
-        $this->filters[] = $filter;
+        // Do not duplicate filters
+        $exists = array_search($filter, $this->filters, true);
+        if ($exists === false) {
+            $this->filters[] = $filter;
+        }
         return $this;
     }
 
     public function removeFilter($filter) {
         $pos = array_search($filter, $this->filters, true);
-        if ($pos > -1) {
+        if ($pos !== false && $pos > -1) {
             array_splice($this->filters, $pos, 1);
         }
         return $this;
