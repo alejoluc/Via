@@ -22,6 +22,12 @@ Router::group('admin/', function(){
 }, ['isLoggedIn']);
 ```
 
+## Match Handlers
+
+There are three possible scenarios when calling the `dispatch()` method: no route will match, or a route will match but some or all filters will fail, or a route will match and no filter fails.
+
+In all cases, a `Match` object is passed to whatever match handler or handlers you have set up. You can see the `src/SampleHandlers/` folder for several comprehensive handlers.
+
 ## Letting the router build the request string on it's own or using setRequestString()
 
 If no request string is manually specified, the router will try to get it automatically from `$_SERVER['REQUEST_URI']` or `$_SERVER['PATH_INFO']`. Aditionally, it will truncate the script file name from the request string, if it is there, and it will also truncate the query string (anything after `?` or `&`), if it exists. This will not happen if you manually set the request string via `Router::setRequestString()`
