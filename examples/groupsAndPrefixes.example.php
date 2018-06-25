@@ -19,7 +19,7 @@ $router = new alejoluc\Via\Router();
 
 $query = isset($_GET['query']) ? $_GET['query'] : '/';
 
-$router->setRequestString($query);
+$router->setRequestString($query); // Without this call the Router will default to $_SERVER['REQUEST_URI'] or $_SERVER['PATH_INFO']
 
 $router->setMatchHandler([new \alejoluc\Via\SampleHandlers\SampleFullMatchHandler, 'handle']);
 $router->setOptions([
