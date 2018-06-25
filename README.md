@@ -2,13 +2,19 @@
 
 Simple PHP router with prefix grouping and filters
 
+## Usage
+
+Please refer to the `examples` folder to see how to use the router, along with usage of grouping and filters.
+
 ## Using the "Facade"
 
-A "Facade" is provided for those that want clearer code and don't mind using static classes here and there. You can use any method of the Router class when calling the Facade.
+A "Facade" is provided for those that want clearer code and don't mind using static classes here and there. You can use any method of the `Router` class when calling the Facade.
 
 ```php
 <?php
 use alejoluc\Via\RouterFacade as Router;
+
+// [Set up Router (see file in examples) 
 
 Router::get('login', ['LoginController', 'showForm']);
 Router::group('admin/', function(){

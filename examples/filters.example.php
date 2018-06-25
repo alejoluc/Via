@@ -18,6 +18,7 @@ $router->setOptions([
 // Registering filters in the router itself
 $router->registerFilter('isLoggedIn', function(){
     if (!isset($_SESSION['logged-in'])) {
+        //header('Location: index.php?query=/login');
         return 'You must be logged in to view this section';
     }
     return true;
