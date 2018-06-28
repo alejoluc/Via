@@ -10,6 +10,22 @@ This README file is a work in progress and is in the process of being written. I
 
 Please refer to the `examples` folder to see how to use the router, along with usage of grouping and filters.
 
+## Installation
+
+From the command line:
+
+`composer require alejoluc/via`
+
+Or write manually in `composer.json`:
+
+```json
+{
+  "require": {
+    "alejoluc/via": "*"
+  }
+}
+```
+
 ## Using the "Facade"
 
 A "Facade" is provided for those that want clearer code and don't mind using static classes here and there. You can use any method of the `Router` class when calling the Facade.
