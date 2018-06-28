@@ -2,6 +2,10 @@
 
 Simple PHP router with prefix grouping and filters
 
+## Work in Progress
+
+This README file is a work in progress and is in the process of being written. In the meantime, please refer to the `examples` folder to get started.
+
 ## Usage
 
 Please refer to the `examples` folder to see how to use the router, along with usage of grouping and filters.

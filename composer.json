@@ -1,7 +1,7 @@
 {
   "name"        : "alejoluc/via",
   "description" : "Simple PHP Router, with prefix groups and filtering",
-  "version"     : "0.7.0",
+  "version"     : "0.12.2",
 
   "keywords"  : ["router", "routing"],
   "homepage"  : "https://github.com/alejoluc/Via",
