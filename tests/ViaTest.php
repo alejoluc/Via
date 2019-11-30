@@ -239,4 +239,20 @@ class ViaTest extends TestCase
         $this->assertEquals('/some/prefix/endpoint/check/', $link);
     }
 
+    public function testParametersCanBeDefinedInGroups() {
+        $this->router->setRequestString('/users/alejo/update/persist');
+        $this->router->group('/users/{user}/', function() {
+            $this->router->group('/{action}/', function(){
+                $this->router->get('persist', function($request){
+                    $params = $request->getParameters();
+                    return "Persisting action $params[action] for user $params[user]";
+                });
+            });
+        });
+        $dispatch = $this->router->dispatch();
+        $callback = $dispatch->getDestination();
+        $request  = $dispatch->getRequest();
+        $result   =  $callback($request);
+        $this->assertEquals($result, 'Persisting action update for user alejo');
+    }
 }
