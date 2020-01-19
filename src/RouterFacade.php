@@ -3,7 +3,8 @@
 namespace alejoluc\Via;
 
 class RouterFacade {
-    
+
+    /** @var Router $router */
     protected static $router = null;
 
     public static function getInstance() {

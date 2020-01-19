@@ -259,6 +259,10 @@ class Router
         $routeMatch = new Match();
         $request    = new Request();
 
+        $routeMatch->setRequest($request);
+        $request->setRequestString($this->requestString);
+
+
         $allRoutes = array_merge($this->routes_static, $this->routes);
         /** @var Route $route */
         foreach  ($allRoutes as $route) {
@@ -271,9 +275,6 @@ class Router
                     $this->keepOnlyNamedKeys($parameterMatches);
 
                     $request->setParameters($parameterMatches);
-                    $request->setRequestString($this->requestString);
-                    $routeMatch->setRequest($request);
-
                     $routeMatch->setDestination($route->destination);
                     $routeMatch->setMatchFound(true);
                     $routeMatch->setFilters($route->filters);
@@ -283,6 +284,7 @@ class Router
         }
 
         if (!$routeMatch->isMatch()) { // No match, we can return early
+
             if (is_callable($this->noMatchFoundHandler)) {
                 // If onNoMatchFound() was setup, call it, and pass it the request string
                 return call_user_func($this->noMatchFoundHandler, $this->requestString);
