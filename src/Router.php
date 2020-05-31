@@ -132,6 +132,16 @@ class Router
         return $this->add($pattern, $destination, 'DELETE', $name);
     }
 
+    /**
+     * Shorthand method to call add() with any request method
+     * @param string $pattern
+     * @param mixed $destination
+     * @return Route
+     */
+    public function any($pattern, $destination, $name = null) {
+        return $this->add($pattern, $destination, self::METHOD_ALL, $name);
+    }
+
     public function group($prefix, $callback, $filters = array()) {
         if (strpos($prefix, '/') === 0) { $prefix = substr($prefix, 1); }
         if (substr($prefix, -1) === '/') { $prefix = substr($prefix, 0, -1); }
