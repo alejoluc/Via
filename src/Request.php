@@ -45,4 +45,9 @@ class Request {
     public function getRequestString() {
         return $this->requestString;
     }
+
+    public function __get($name) {
+        $mix = array_merge($_POST, $this->getParameters(), $_GET);
+        return $mix[$name] ?? null;
+    }
 }
