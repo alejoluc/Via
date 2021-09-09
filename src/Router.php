@@ -7,16 +7,16 @@ class Router
     const METHOD_ALL = 'ALL_METHODS';
 
     // All letters, all numbers, underscore, hyphen, dot, comma, semicolon and colon. No spaces.
-    const ALLOW_DEFAULT      = '[A-z0-9-_.,;:]+';
-    const ALLOW_NUMERIC      = '\d+';
-    const ALLOW_ONLYLETTERS  = '[A-z]+';
+    const ALLOW_DEFAULT = '[A-z0-9-_.,;:]+';
+    const ALLOW_NUMERIC = '\d+';
+    const ALLOW_ONLYLETTERS = '[A-z]+';
     const ALLOW_ALPHANUMERIC = '\w+'; // Includes the underscore character, but not the hyphen or the dot
 
-    private $routes         = [];
-    private $routes_static  = [];
-    private $idCounter      = 0;
+    private $routes = [];
+    private $routes_static = [];
+    private $idCounter = 0;
 
-    private $namedRoutes    = [];
+    private $namedRoutes = [];
 
     private $requestString;
     private $requestMethod;
@@ -32,7 +32,7 @@ class Router
 
     private $options = [
         'pattern.caseInsensitive' => true,
-        'pattern.ungreedyRegex'   => true,
+        'pattern.ungreedyRegex' => true,
         'filters.stopOnFirstFail' => true
     ];
 
@@ -42,10 +42,10 @@ class Router
 
     /**
      * Add a route to the router
-     * @param string      $pattern
-     * @param mixed       $destination
-     * @param string      $method
-     * @param string|null $name  Give a name for the route, usually to be used with the getPath() method afterwards
+     * @param string $pattern
+     * @param mixed $destination
+     * @param string $method
+     * @param string|null $name Give a name for the route, usually to be used with the getPath() method afterwards
      * @return Route
      */
     public function add($pattern, $destination, $method = self::METHOD_ALL, $name = null)
@@ -55,7 +55,7 @@ class Router
         $route->method = $method;
         $route->destination = $destination;
 
-        if ($name!== null && is_string($name)) {
+        if ($name !== null && is_string($name)) {
             $this->namedRoutes[$name] = $route;
         }
 
@@ -98,7 +98,8 @@ class Router
      * @param mixed $destination
      * @return Route
      */
-    public function get($pattern, $destination, $name = null) {
+    public function get($pattern, $destination, $name = null)
+    {
         return $this->add($pattern, $destination, 'GET', $name);
     }
 
@@ -108,7 +109,8 @@ class Router
      * @param mixed $destination
      * @return Route
      */
-    public function post($pattern, $destination, $name = null) {
+    public function post($pattern, $destination, $name = null)
+    {
         return $this->add($pattern, $destination, 'POST', $name);
     }
 
@@ -118,7 +120,8 @@ class Router
      * @param mixed $destination
      * @return Route
      */
-    public function put($pattern, $destination, $name = null) {
+    public function put($pattern, $destination, $name = null)
+    {
         return $this->add($pattern, $destination, 'PUT', $name);
     }
 
@@ -128,7 +131,8 @@ class Router
      * @param mixed $destination
      * @return Route
      */
-    public function delete($pattern, $destination, $name = null) {
+    public function delete($pattern, $destination, $name = null)
+    {
         return $this->add($pattern, $destination, 'DELETE', $name);
     }
 
@@ -138,8 +142,19 @@ class Router
      * @param mixed $destination
      * @return Route
      */
-    public function any($pattern, $destination, $name = null) {
+    public function any($pattern, $destination, $name = null)
+    {
         return $this->add($pattern, $destination, self::METHOD_ALL, $name);
+    }
+
+    public function resource($resource_name, $controllerName) {
+        $this->get($resource_name, [$controllerName, 'index'], "{$resource_name}.index");
+        $this->get("{$resource_name}/create", [$controllerName, 'create'], "{$resource_name}.create");
+        $this->post("{$resource_name}/create", [$controllerName, 'store'], "{$resource_name}.store");
+        $this->get("{$resource_name}/{id}/edit", [$controllerName, 'edit'], "{$resource_name}.edit");
+        $this->put("{$resource_name}/{id}/update", [$controllerName, 'update'], "{$resource_name}.update");
+        $this->get("{$resource_name}/{id}", [$controllerName, 'show'], "{$resource_name}.show");
+        $this->delete("{$resource_name}/{id}", [$controllerName, 'destroy'], "{$resource_name}.destroy");
     }
 
     public function group($prefix, $callback, $filters = array()) {
@@ -427,7 +442,7 @@ class Router
      */
     private function resolveRequestMethod() {
         if ($this->requestMethod === null) {
-            $this->requestMethod = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : 'GET';
+            $this->requestMethod = isset($_POST['_method']) ? strtoupper($_POST['_method']) : (isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : 'GET');
         }
     }
 
